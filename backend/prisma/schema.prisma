@@ -1,0 +1,156 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String          @id @default(uuid())
+  email      String          @unique
+  givenName  String?         @map("given_name")
+  familyName String?         @map("family_name")
+  picture    String?
+  password   String?
+  role       String?
+  createdAt  DateTime        @default(now()) @map("created_at")
+  updatedAt  DateTime        @updatedAt @map("updated_at")
+  reviews    Review[]
+  tickets    Ticket[]
+  accounts   Account[]
+  looks      UserLookEvent[]
+  organizer  Organizer?
+  follows    Follower[]
+}
+
+model Follower {
+  userId      String
+  organizerId String
+
+  user      User      @relation(fields: [userId], references: [id])
+  organizer Organizer @relation(fields: [organizerId], references: [id])
+
+  @@id([userId, organizerId])
+}
+
+model Organizer {
+  id          String     @id @default(uuid())
+  user        User       @relation(fields: [userId], references: [id])
+  userId      String     @unique
+  email       String?
+  name        String?
+  social      Json?
+  phoneNumber String?    @map("phone_number")
+  picture     String?
+  description String?
+  events      Event[]
+  followers   Follower[]
+}
+
+model Account {
+  id                 String    @id @default(cuid())
+  userId             String    @map("user_id")
+  providerType       String    @map("provider_type")
+  providerAccountId  String    @map("provider_account_id")
+  locale             String
+  refreshToken       String?   @map("refresh_token") @db.Text
+  accessToken        String?   @map("access_token") @db.Text
+  verified           Boolean
+  accessTokenExpires DateTime? @map("access_token_expires")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+  user               User      @relation(fields: [userId], references: [id])
+
+  @@unique([providerAccountId])
+}
+
+model UserLookEvent {
+  eventId   Int
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  event     Event    @relation(fields: [eventId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@id([eventId, userId])
+}
+
+model Event {
+  id               Int             @id @default(autoincrement())
+  organizerId      String          @map("organizer_id")
+  title            String
+  shortDescription String          @map("short_description") @db.MediumText
+  description      String          @db.Text
+  location         String?         @default("")
+  city             String?         @default("Danang")
+  country          String?         @default("Vietnam")
+  timezone         String?         @default("")
+  language         String          @default("en")
+  venue            String?         @default("online")
+  slug             String?         @default("")
+  latitude         Float?
+  longtitude       Float?
+  ticketPrice      Float?
+  isCancelled      Boolean?        @map("is_cancelled")
+  isOnlineEvent    Boolean?        @map("is_online_event")
+  onlineUrl        String?         @default("")
+  images           Json?           @default("[]") @map("images")
+  startDate        DateTime        @default(now()) @map("start_date")
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
+  duration         String          @default("3h")
+  totalTickets     Int             @default(100) @map("total_tickets")
+  sold             Int             @default(0)
+  tickets          Ticket[]
+  reviews          Review[]
+  organizer        Organizer       @relation(fields: [organizerId], references: [id])
+  TicketType       TicketType[]
+  looks            UserLookEvent[]
+  tags             Tag[]
+}
+
+model TicketType {
+  id      Int    @id @default(autoincrement())
+  eventId Int
+  type    String
+  price   Float
+  event   Event  @relation(fields: [eventId], references: [id])
+}
+
+model Ticket {
+  id            String   @id @default(cuid())
+  eventId       Int      @map("event_id")
+  userId        String?  @map("user_id")
+  customerEmail String   @default("") @map("customer_email")
+  customerName  String   @default("") @map("customer_name")
+  customerCID   String   @default("") @map("customer_cid")
+  type          String   @default("standard")
+  status        String   @default("active")
+  ticketCode    String?  @default("")
+  price         Float
+  pdfUrl        String?  @map("pdf_url")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  user          User?    @relation(fields: [userId], references: [id])
+  event         Event    @relation(fields: [eventId], references: [id])
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  eventId   Int      @map("event_id")
+  rating    Int
+  userId    String   @map("user_id")
+  comment   String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  user      User     @relation(fields: [userId], references: [id])
+  event     Event    @relation(fields: [eventId], references: [id])
+}
+
+model Tag {
+  id     Int     @id @default(autoincrement())
+  name   String
+  events Event[]
+}
