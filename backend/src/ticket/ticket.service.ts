@@ -8,7 +8,7 @@ import { PrismaService } from 'src/common/providers/prisma.service';
 import { UtilService } from 'src/common/providers/util.service';
 import { RequestUser } from 'src/users/users.dto';
 import { TicketFactory, TICKET_TYPE } from './generator/ticket.factory';
-import { CreateTicketDto, FindTicketDto, SendETicketDto } from './ticket.dto';
+import { CreateTicketDto, FindTicketDto, GetTicketByOrganizerDto, SendETicketDto } from './ticket.dto';
 
 @Injectable()
 export class TicketService {
@@ -63,7 +63,11 @@ export class TicketService {
     return tickets;
   }
 
-  async getTicketsByOrganizer(organizerId: string, user: RequestUser) {
+  async getTicketsByOrganizer(
+    organizerId: string,
+    getTicketByOrganizerDto: GetTicketByOrganizerDto,
+    user: RequestUser,
+  ) {
     const organizer = await this.prisma.organizer.findUnique({ where: { id: organizerId } });
 
     if (!organizer) {
@@ -73,9 +77,14 @@ export class TicketService {
     if (organizerId !== user.organizer.id) {
       throw new ForbiddenException('User is the owner of the organizer');
     }
+
     const tickets = await this.prisma.ticket.findMany({
-      where: { event: { organizerId } },
+      where: {
+        event: { organizerId, id: getTicketByOrganizerDto.eid },
+        status: getTicketByOrganizerDto.status,
+      },
       include: { event: { select: { title: true, startDate: true, isCancelled: true } } },
+      orderBy: { updatedAt: 'desc' },
     });
 
     return tickets;
@@ -136,7 +145,7 @@ export class TicketService {
     });
 
     // off load save pdf to queue
-    await this.ticketsQueue.add('save-pdf-ticket', ticket);
+    // await this.ticketsQueue.add('save-pdf-ticket', ticket);
 
     return ticket;
   }

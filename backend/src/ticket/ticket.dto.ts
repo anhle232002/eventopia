@@ -47,3 +47,12 @@ export class CreateTicketDto {
   customerName: string;
   customerCID: string;
 }
+export class GetTicketByOrganizerDto {
+  @ApiProperty()
+  @IsOptional()
+  status: string;
+
+  @ApiProperty()
+  @IsOptional()
+  eid: number;
+}

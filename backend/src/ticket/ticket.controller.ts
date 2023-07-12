@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Logger, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Logger, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
@@ -7,7 +7,7 @@ import { ReqUser } from 'src/common/decorators/req-user.decorator';
 import { Roles } from 'src/common/decorators/role.decorator';
 import { RolesGuard } from 'src/common/guards/role.guard';
 import { RequestUser } from 'src/users/users.dto';
-import { FindTicketDto, ProcessTicketDto, SendETicketDto } from './ticket.dto';
+import { FindTicketDto, GetTicketByOrganizerDto, ProcessTicketDto, SendETicketDto } from './ticket.dto';
 import { TicketService } from './ticket.service';
 
 @ApiTags('tickets')
@@ -30,8 +30,16 @@ export class TicketController {
   @Get('/organizers/:organizerId')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.Organizer)
-  async getTicketsByOrganizer(@Param('organizerId') organizerId: string, @ReqUser() user: RequestUser) {
-    const tickets = await this.ticketService.getTicketsByOrganizer(organizerId, user);
+  async getTicketsByOrganizer(
+    @Param('organizerId') organizerId: string,
+    @ReqUser() user: RequestUser,
+    @Query() getTicketByOrganizerDto: GetTicketByOrganizerDto,
+  ) {
+    const tickets = await this.ticketService.getTicketsByOrganizer(
+      organizerId,
+      getTicketByOrganizerDto,
+      user,
+    );
 
     return tickets;
   }

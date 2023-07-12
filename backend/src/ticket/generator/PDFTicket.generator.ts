@@ -1,10 +1,12 @@
+import { Logger } from '@nestjs/common';
 import { TicketGenerator } from './ticket.generator';
-import { readFile } from 'fs/promises';
-import path from 'path';
+import { readFile, mkdir } from 'fs/promises';
+import fs from 'fs';
 import puppeteer from 'puppeteer';
 import hbs from 'handlebars';
-import { Logger } from '@nestjs/common';
 import QRCode from 'qrcode';
+import path from 'path';
+
 export interface PDFTicketContent {
   eventName: string;
   eventDate: string;
@@ -40,11 +42,16 @@ export class PDFTicketGenerator implements TicketGenerator {
 
       await page.setContent(content);
 
-      const buffer = await page.pdf({ path: 'test.pdf', format: 'a5', printBackground: true });
+      if (!fs.existsSync('files')) {
+        await mkdir('files');
+      }
+
+      const fileName = path.resolve('files', `${Date.now()}.pdf`);
+      await page.pdf({ path: fileName, format: 'a5', printBackground: true });
 
       await browser.close();
 
-      return buffer;
+      return fileName;
     } catch (error) {
       Logger.error(error);
     }
