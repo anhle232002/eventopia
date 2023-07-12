@@ -3,9 +3,8 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { startOfDay, endOfDay, endOfWeek, endOfMonth } from 'date-fns';
 import { exec } from 'child_process';
 import QrCode from 'qrcode';
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
-import rimraf from 'rimraf';
 
 @Injectable()
 export class UtilService {
@@ -54,14 +53,13 @@ export class UtilService {
     return { start: startOfDay(now), end: endOfMonth(now) };
   }
 
-  @Cron('*/20 * * * * *')
+  @Cron(CronExpression.EVERY_30_MINUTES)
   async clearFolderFiles() {
     try {
       const folderPath = path.resolve('files');
 
-      const a = await rimraf(`${process.cwd()}/**`, { glob: false });
-
-      console.log(`${process.cwd()}/files/**`);
+      await fs.rm(`${folderPath}`, { recursive: true, force: true });
+      await fs.mkdir(folderPath);
 
       Logger.log('Clear folder files succesfully', 'Util');
     } catch (error) {
