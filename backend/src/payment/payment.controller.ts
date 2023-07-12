@@ -50,7 +50,7 @@ export class PaymentController {
 
     switch (event.type) {
       case 'checkout.session.completed': {
-        await this.paymentService.handleOnCheckoutSessionCompleted(event);
+        this.paymentService.handleOnCheckoutSessionCompleted(event);
 
         return 'Success';
       }

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsNumber, IsString, Min } from 'class-validator';
 
 export class CheckOutTicketDto {
   eventId: number;
@@ -28,6 +28,7 @@ export class BuyTicketDto {
 
   @ApiProperty()
   @IsNumber()
+  @Min(1)
   quantity: number;
 }
 

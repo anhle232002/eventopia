@@ -2,7 +2,9 @@ import { InjectQueue, Process, Processor } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
 import { Job, Queue } from 'bull';
 import { EmailNotification } from 'src/common/providers/notification/notification.service';
+import { UtilService } from 'src/common/providers/util.service';
 import { EventsService } from 'src/events/events.service';
+import { PDFTicketContent } from 'src/ticket/generator/PDFTicket.generator';
 import { TicketService } from 'src/ticket/ticket.service';
 
 @Processor('payment')
@@ -10,6 +12,7 @@ export class PaymentProcessor {
   constructor(
     private readonly eventService: EventsService,
     private readonly ticketService: TicketService,
+    private readonly utilService: UtilService,
     @InjectQueue('notification') private readonly notificationQueue: Queue,
   ) {}
 
@@ -18,17 +21,32 @@ export class PaymentProcessor {
     try {
       const ticketIds = job.data.ticketIds;
       const order = job.data.order;
+      const event = await this.eventService.getEvent(order.eventId);
 
-      const createQRTickets = ticketIds.map(async (id) => {
+      const createQRTicketsPromises = ticketIds.map(async (id) => {
         const ticketVerifyUrl = await this.ticketService.getTicketVerifyUrl(id);
 
         return this.ticketService.createETicket('QR', { ticketVerifyUrl });
       });
 
-      const QRTickets = await Promise.all(createQRTickets);
+      const createPDFTicketsPromises = ticketIds.map(async (id) => {
+        const data: PDFTicketContent = {
+          eventCity: event.city,
+          eventCountry: event.country,
+          eventDate: this.utilService.formatLocaleDate(event.startDate),
+          eventDuration: event.duration,
+          eventLocation: event.location,
+          eventName: event.title,
+          attendeeName: order.customerName,
+          ticketId: id,
+          ticketType: order.type,
+          ticketVerifyUrl: await this.ticketService.getTicketVerifyUrl(id),
+        };
+        return this.ticketService.createETicket('PDF', { content: data, template: 'pdf-ticket.hbs' });
+      });
 
-      // Get Event information
-      const { title, location, startDate } = await this.eventService.getEvent(order.eventId);
+      const pdfFiles = await Promise.all(createPDFTicketsPromises);
+      const QRTickets = await Promise.all(createQRTicketsPromises);
 
       const attachedQrCodes = QRTickets.map((qrcode, index) => {
         return {
@@ -39,20 +57,28 @@ export class PaymentProcessor {
         };
       });
 
+      const attachedPdfs = pdfFiles.map((file, index) => {
+        return {
+          filename: `ticket-${ticketIds[index]}.pdf`,
+          path: file,
+          cid: `ticket-${index}`,
+        };
+      });
+
       const notification: EmailNotification = {
         to: order.customerEmail,
         template: 'confirm-payment',
         context: {
-          eventName: title,
+          eventName: event.title,
           customerName: order.customerName,
           ticketType: order.type,
           quantity: order.quantity,
           total: order.quantity * order.price,
           qrCodes: attachedQrCodes,
-          location,
-          startDate,
+          location: event.location,
+          startDate: this.utilService.formatLocaleDate(event.startDate),
         },
-        attachments: attachedQrCodes,
+        attachments: [...attachedQrCodes, ...attachedPdfs],
         attachDataUrls: true,
       };
 

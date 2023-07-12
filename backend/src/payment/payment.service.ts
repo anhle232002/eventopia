@@ -53,7 +53,7 @@ export class PaymentService {
             },
             unit_amount: updatedEvent.ticketPrice * 100,
           },
-          quantity: 1,
+          quantity: checkOutTicketDto.quantity,
         },
       ],
       metadata: {
@@ -121,6 +121,7 @@ export class PaymentService {
       customerCID: order.customerCID,
     });
 
+    // considering using transaction
     const tickets = await Promise.all(
       ticketData.map((ticket) => {
         return this.ticketService.createTicket(ticket);
