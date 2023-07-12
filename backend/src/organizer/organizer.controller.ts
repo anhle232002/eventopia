@@ -24,11 +24,16 @@ import { ReqUser } from 'src/common/decorators/req-user.decorator';
 import { RequestUser } from 'src/users/users.dto';
 import { GetFollowersDto } from './dto/get-followers.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { OptionalJWT } from 'src/common/guards/optional-jwt.guard';
+import { UsersService } from 'src/users/users.service';
 
 @ApiTags('organizers')
 @Controller('/api/organizers')
 export class OrganizerController {
-  constructor(private readonly organizerService: OrganizerService) {}
+  constructor(
+    private readonly organizerService: OrganizerService,
+    private readonly usersService: UsersService,
+  ) {}
 
   @Post()
   @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -52,8 +57,16 @@ export class OrganizerController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.organizerService.findOne(id);
+  @UseGuards(OptionalJWT)
+  async findOne(@Param('id') id: string, @ReqUser() user?: RequestUser) {
+    const organizer = await this.organizerService.findOne(id);
+
+    let isFollowedByYou = null;
+    if (!user) {
+      isFollowedByYou = this.usersService.isFollowingOrganizer(user.id, organizer.id);
+    }
+
+    return { ...organizer, isFollowedByYou };
   }
 
   @ApiBearerAuth()

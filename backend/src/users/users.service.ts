@@ -60,4 +60,12 @@ export class UsersService {
       },
     });
   }
+
+  async isFollowingOrganizer(userId: string, organizerId: string) {
+    const followed = await this.prisma.user.findFirst({
+      where: { id: userId, follows: { some: { organizerId } } },
+    });
+
+    return !!followed;
+  }
 }
