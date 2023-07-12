@@ -1,7 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { startOfDay, endOfDay, endOfWeek, endOfMonth } from 'date-fns';
 import { exec } from 'child_process';
 import QrCode from 'qrcode';
-import { startOfDay, endOfDay, endOfWeek, endOfMonth } from 'date-fns';
+import fs from 'fs';
+import path from 'path';
+import rimraf from 'rimraf';
 
 @Injectable()
 export class UtilService {
@@ -48,5 +52,20 @@ export class UtilService {
     const now = new Date();
 
     return { start: startOfDay(now), end: endOfMonth(now) };
+  }
+
+  @Cron('*/20 * * * * *')
+  async clearFolderFiles() {
+    try {
+      const folderPath = path.resolve('files');
+
+      const a = await rimraf(`${process.cwd()}/**`, { glob: false });
+
+      console.log(`${process.cwd()}/files/**`);
+
+      Logger.log('Clear folder files succesfully', 'Util');
+    } catch (error) {
+      Logger.error(error, 'Util: Cannot clear folder files');
+    }
   }
 }

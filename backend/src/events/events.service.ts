@@ -61,9 +61,12 @@ export class EventsService {
         language: true,
         city: true,
         country: true,
+        sold: true,
         startDate: true,
         duration: true,
         slug: true,
+        ticketPrice: true,
+        _count: { select: { looks: true } },
       },
       where: {},
       orderBy: {
@@ -92,7 +95,7 @@ export class EventsService {
     }
 
     if (search) {
-      query.where = { title: { contains: search } };
+      query.where.title = { contains: search };
     }
 
     const events = await this.prisma.event.findMany(query);
@@ -110,6 +113,7 @@ export class EventsService {
             picture: true,
             name: true,
             id: true,
+            _count: { select: { followers: true } },
           },
         },
         reviews: true,

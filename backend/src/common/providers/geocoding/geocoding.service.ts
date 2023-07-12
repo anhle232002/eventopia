@@ -13,7 +13,7 @@ export class GeocodingServiceImpl implements GeocodingService {
   async getLocation(
     latitude: number,
     longtitude: number,
-    language = 'vi',
+    language = 'en',
   ): Promise<{ city: string; country: string; timezone: string }> {
     const response = await fetch(
       'https://api.bigdatacloud.net/data/reverse-geocode-client' +
@@ -21,9 +21,10 @@ export class GeocodingServiceImpl implements GeocodingService {
     );
 
     const data = await response.json();
-    const timezoneInfoOrder = 4;
+    console.log(data);
+
     const timezone =
-      (data.localityInfo.informative as any[]).find((info) => info.order === timezoneInfoOrder).name || null;
+      (data.localityInfo.informative as any[]).find((info) => info.description === 'time zone').name || null;
 
     return { city: data.city, country: data.countryName, timezone: timezone };
   }

@@ -19,6 +19,7 @@ import { LocalStrategy } from './strategies/local.strategy';
     OrganizerModule,
     CommonModule,
   ],
+  exports: [AuthService],
   controllers: [AuthController],
   providers: [AuthService, GoogleStrategy, JwtStrategy, JwtRefreshStategy, LocalStrategy],
 })

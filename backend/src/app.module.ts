@@ -60,6 +60,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
       useFactory(configService: ConfigService) {
         return {
           redis: {
+            host: configService.get<string>('REDIS_HOST') || 'localhost',
             port: configService.get<number>('REDIS_PORT'),
             password: configService.get<string>('REDIS_PASSWORD'),
           },
