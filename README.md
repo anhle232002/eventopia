@@ -13,17 +13,13 @@ Eventopia provides a platform to discover, create events in your local community
 ## Key Features
 
 <li> Event Discovery: Easily browse and search event </li>
-<li> Ticket Purchase: Users can buy tickets for events. </li>
-<li> Ticket Finding: Users can find their tickets for events. </li>
-<li> Organizer Role: Users can become event organizers. </li>
-<li> Event Creation: Organizers can create new events. </li>
-<li> Event Updates: Organizers can update event details. </li>
-<li> Entry Management: Organizers can scan QR codes to manage attendee entry. </li>
-<li> Event Notifications: Reminding user about their upcoming events  </li>
-
+<li> Event Discovery: Easily browse and search event </li>
+<li> Event Discovery: Easily browse and search event </li>
 
 ## Installation
+
 ### Backend (mysql,redis required)
+
 ```bash
 $ npm install
 
@@ -46,21 +42,26 @@ $ npm install
 $ npm run dev
 
 ```
+
 ### Or with Docker
+
 ```bash
-$ 
+$
 # Setup env file in /backend/.env
 
 # Run containers
-$ docker compose up -d --build 
+$ docker compose up -d --build
 
 # insert seed data
 $ docker exec -it backend npx prisma db seed
 ```
 
 ## API docs (Swagger)
+
 <p>API docs available on http://localhost:3000/api</p>
 
 ## Demo
+
 ### Test payment with Stripe
-Use [Test cards](https://stripe.com/docs/testing#use-test-cards) to test payment 
+
+Use [Test cards](https://stripe.com/docs/testing#use-test-cards) to test payment
