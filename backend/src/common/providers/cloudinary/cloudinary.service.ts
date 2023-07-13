@@ -104,8 +104,6 @@ export class CloudinaryService {
   async downloadFile(publicId: string, fileName: string) {
     const url = this.instance.image(publicId, { transformation: [{ page: 1 }] });
 
-    console.log(url);
-
     const response = await fetch(url);
 
     if (!response.ok) {

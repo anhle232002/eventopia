@@ -8,9 +8,13 @@ export class StripeService {
   private stripe: Stripe;
 
   constructor(private readonly configService: ConfigService) {
-    this.stripe = new Stripe(configService.get<string>('STRIPE_API_KEY'), {
-      apiVersion: '2022-11-15',
-    });
+    try {
+      this.stripe = new Stripe(configService.get<string>('STRIPE_API_KEY'), {
+        apiVersion: '2022-11-15',
+      });
+    } catch (error) {
+      Logger.error('Error connect to stripe', 'Stripe');
+    }
   }
 
   createSession(args: CreateSessionArgs) {

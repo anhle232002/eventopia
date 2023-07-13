@@ -18,7 +18,6 @@ export class FindTicketDto {
   cid: string;
 
   @ApiProperty()
-  @IsOptional()
   @IsNumber()
   eventId: number;
 }
