@@ -2,6 +2,7 @@ import { Body, Controller, Get, Logger, Post, Req, Res, UseGuards } from '@nestj
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
+import { COOKIE_AGE } from 'src/common/constants';
 import { ReqUser } from 'src/common/decorators/req-user.decorator';
 import { RequestUser } from 'src/users/users.dto';
 import { UsersService } from 'src/users/users.service';
@@ -34,9 +35,15 @@ export class AuthController {
     const accessToken = await this.authService.createAccessToken(req.user);
     const refreshToken = await this.authService.createRefreshToken(req.user);
 
-    res.cookie('refresh-token', refreshToken);
+    res.cookie('refresh-token', refreshToken, { httpOnly: true, secure: true, maxAge: COOKIE_AGE });
 
     return { accessToken };
+  }
+
+  @Get('/logout')
+  @UseGuards(AuthGuard('jwt-refresh'))
+  async logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('refresh-token');
   }
 
   @ApiOperation({ description: 'Sign up' })
@@ -60,7 +67,12 @@ export class AuthController {
   async googleAuthRedirect(@Req() req: any, @Res({ passthrough: true }) res: Response) {
     const { refreshToken, accessToken } = await this.authService.loginWithGoogle(req.user);
 
-    res.cookie('refresh-token', refreshToken, { sameSite: 'lax' });
+    res.cookie('refresh-token', refreshToken, {
+      sameSite: 'lax',
+      httpOnly: true,
+      secure: true,
+      maxAge: COOKIE_AGE,
+    });
 
     // TODO: change this url
     res.redirect('http://localhost:5173');

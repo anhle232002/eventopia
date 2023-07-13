@@ -1,7 +1,8 @@
 import { BadRequestException } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEmail, IsString, ValidateIf, ValidateNested } from 'class-validator';
+import { IsBoolean, IsEmail, IsString, ValidateIf, ValidateNested } from 'class-validator';
+import { Role } from 'src/common/constants';
 
 export class Organizer {
   @ApiProperty()
@@ -60,18 +61,18 @@ export class SignUpDto {
   password: string;
 
   @ApiProperty()
-  @IsString()
+  @IsBoolean()
   @ValidateIf((object) => {
-    if (object.role === 'organizer' && !object.organizer) {
+    if (object.role && !object.organizer) {
       throw new BadRequestException('Role organizer must come with Organizer info');
     }
 
-    return !!object.role;
+    return true;
   })
-  role: string;
+  isOrganizer: boolean;
 
   @ApiProperty()
-  @ValidateIf((object) => object.role === 'organizer')
+  @ValidateIf((object) => object.role)
   @ValidateNested()
   @Type(() => Organizer)
   organizer: Organizer;

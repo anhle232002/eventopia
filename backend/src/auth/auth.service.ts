@@ -37,7 +37,7 @@ export class AuthService {
       password: signupDto.password,
     });
 
-    if (signupDto.role === Role.Organizer && signupDto.organizer) {
+    if (signupDto.isOrganizer && signupDto.organizer) {
       await this.organizerService.create({
         description: signupDto.organizer.description,
         email: signupDto.organizer.email,
@@ -55,6 +55,10 @@ export class AuthService {
 
     if (!user) {
       throw new NotFoundException('User does not exist');
+    }
+
+    if (!user.password) {
+      throw new BadRequestException('User is not registered by this password');
     }
 
     const passwordMatched = await bcrypt.compare(pass, user.password);
