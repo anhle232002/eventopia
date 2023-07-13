@@ -7,7 +7,6 @@ export const refreshToken = async () => {
   const { accessToken } = response.data;
 
   storage.set("token", accessToken);
-  console.log(accessToken);
 
   return response.data;
 };

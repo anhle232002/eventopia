@@ -1,7 +1,7 @@
 import { processTicket } from "@/api/process-ticket";
 import { useTicketInfo } from "@/hooks/useTicketInfo";
 import { formatDate } from "@/utils";
-import { Html5Qrcode, Html5QrcodeScanner } from "html5-qrcode";
+import { Html5Qrcode } from "html5-qrcode";
 import { useEffect, useRef, useState } from "react";
 
 function VerifyTicket() {
@@ -9,7 +9,6 @@ function VerifyTicket() {
   const [cameraId, setCameraId] = useState("");
   const [result, setResult] = useState("");
   const { data, isLoading } = useTicketInfo(result);
-  console.log("ticket", data);
 
   async function onScanSuccess(decodedText: any, decodedResult: any) {
     setResult(decodedText);
@@ -36,7 +35,6 @@ function VerifyTicket() {
   useEffect(() => {
     if (scanner && cameraId && !result) {
       scanner.current = new Html5Qrcode("reader");
-      console.log(cameraId);
 
       scanner.current
         .start(
@@ -92,12 +90,10 @@ export default VerifyTicket;
 function TicketInfo({ ticket }: { ticket: any }) {
   const handleClickAllowTicket = async () => {
     const response = await processTicket(ticket.id, true);
-    console.log(response);
   };
 
   const handleClickRejectTicket = async () => {
     const response = await processTicket(ticket.id, false);
-    console.log(response);
   };
   return (
     <div>

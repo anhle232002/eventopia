@@ -1,16 +1,14 @@
-import VerifyTicketModal from "@/components/verify-ticket/VerifyTicketModal";
+import { useUser } from "@/libs/auth";
 import { useEffect, useState } from "react";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 
 function DashBoard() {
-  const [shouldShowVerifyModal, setShouldShowVerifyModal] = useState(false);
+  const navigate = useNavigate();
+  const { data: user, isLoading } = useUser();
 
-  useEffect(() => {
-    if (shouldShowVerifyModal) {
-      (window as any).verify_ticket_modal.showModal();
-    }
-  }, [shouldShowVerifyModal]);
-
+  if (!isLoading && !user) {
+    navigate("/", { replace: true });
+  }
   return (
     <div>
       <div className="drawer lg:drawer-open">

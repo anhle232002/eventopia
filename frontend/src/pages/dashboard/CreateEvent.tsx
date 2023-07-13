@@ -1,4 +1,4 @@
-import { CreateEventDto } from "@/api/create-events";
+import { CreateEventDto } from "@/api/create-event";
 import { useCreateEvent } from "@/hooks/useCreateEvent";
 import { useLocations } from "@/hooks/useLocations";
 import { getDuration } from "@/utils";
@@ -77,7 +77,6 @@ function CreateEvent() {
     const duration = getDuration(data.duration);
     const startDate = new Date(data.startDate).getTime().toString();
     const isOnlineEvent = data.isOnlineEvent ? "1" : "0";
-    console.log(isOnlineEvent);
 
     await createEventMutation.mutateAsync({
       ...(data as CreateEventDto),

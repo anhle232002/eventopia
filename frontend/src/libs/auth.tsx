@@ -33,9 +33,9 @@ export const useLogin = (strategy: string) => {
 
   return useMutation({
     mutationFn: strategyFn,
-    onSuccess(data) {
-      queryClient.setQueryData(["auth", "user"], data);
-    },
+    // onSuccess(data) {
+    //   queryClient.setQueryData(["auth", "user"], data);
+    // },
     onError(error) {
       console.log(error);
     },

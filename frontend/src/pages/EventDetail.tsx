@@ -5,13 +5,11 @@ import { useEvent } from "@/hooks/useEvent";
 import { formatDate, formatDateShort } from "@/utils";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useLoaderData, useParams } from "react-router-dom";
+import { useLoaderData } from "react-router-dom";
 
 function EventDetail() {
   const id = useLoaderData();
   const { data: event, isLoading } = useEvent(Number(id));
-
-  console.log(event);
 
   return (
     <div>

@@ -2,7 +2,7 @@ import { useEvent } from "@/hooks/useEvent";
 import { useLocations } from "@/hooks/useLocations";
 import { useUpdateEvent } from "@/hooks/useUpdateEvent";
 import { getDuration } from "@/utils";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FieldValues, useForm, UseFormRegister } from "react-hook-form";
 import { useLoaderData, useNavigate } from "react-router-dom";
 import { useDebounce, useOnClickOutside } from "usehooks-ts";

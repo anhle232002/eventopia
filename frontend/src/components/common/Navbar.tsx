@@ -14,13 +14,11 @@ function Navbar() {
   const handleOnCreateEvent = () => {
     if (!user) {
       (window as any).login_modal.showModal();
-    }
-
-    if (user.role !== "organizer") {
+    } else if (user.role !== "organizer") {
       (window as any).create_profile_modal.showModal();
+    } else {
+      navigate("/dashboard", { replace: true });
     }
-
-    navigate("/dashboard");
   };
   return (
     <div className="flex px-4 items-center h-16 justify-between border-b border-zinc-300">
@@ -134,9 +132,17 @@ function Navbar() {
           <div className="modal-action justify-between">
             <button className="btn">Close</button>
 
-            <Link to={"/organizer/register"}>
-              <button className="btn">Register</button>
-            </Link>
+            <div>
+              <button
+                onClick={() => {
+                  (window as any).create_profile_modal.close();
+                  navigate("/organizer/register");
+                }}
+                className="btn"
+              >
+                Register
+              </button>
+            </div>
           </div>
         </form>
       </dialog>

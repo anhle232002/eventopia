@@ -1,7 +1,8 @@
+import { axios } from "@/libs/axios";
 import storage from "@/utils/storage";
 
 export const logout = async () => {
-  storage.clear("token");
+  await axios.get("/auth/logout");
 
-  //   window.location.assign(window.location.origin as unknown as string);
+  storage.clear("token");
 };

@@ -1,10 +1,4 @@
-import {
-  BrowserRouter,
-  createBrowserRouter,
-  Route,
-  RouterProvider,
-  Routes,
-} from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./App.css";
 import MainLayout from "./components/layouts/MainLayout";
 import CreateEvent from "./pages/dashboard/CreateEvent";
@@ -27,10 +21,8 @@ const router = createBrowserRouter([
     Component: MainLayout,
     children: [
       { index: true, Component: Home },
-      { path: "/login", Component: Login },
-      { path: "/signup", Component: SignUp },
       { path: "/payment/success", Component: PaymentSuccess },
-      { path: "/organizer/register", Component: RegisterOrganizer },
+      { path: "/organizer/register", Component: RegisterOrganizer, id: "/organizer/register" },
       { path: "/search", Component: SearchEvents },
       { path: "/find-tickets", Component: FindTickets },
 
@@ -45,6 +37,8 @@ const router = createBrowserRouter([
       },
     ],
   },
+  { path: "/login", Component: Login },
+  { path: "/signup", Component: SignUp },
   {
     path: "/dashboard",
     Component: DashBoard,

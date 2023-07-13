@@ -1,4 +1,4 @@
-import { GetEventResponse, getEvents, GetEventsQuery } from "@/api/get-events";
+import { getEvents, GetEventsQuery } from "@/api/get-events";
 import { useQuery } from "@tanstack/react-query";
 
 export const useEvents = (params: GetEventsQuery, enabled = true) => {

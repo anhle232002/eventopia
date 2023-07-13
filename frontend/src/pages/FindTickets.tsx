@@ -10,12 +10,19 @@ function FindTickets() {
   const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
   const { register, setValue, handleSubmit } = useForm();
   const [tickets, setTickets] = useState<any[] | null>(null);
-
+  const [error, setError] = useState("");
   const onSubmit = async (data: Record<string, any>) => {
+    setError("");
+    if (!selectedEvent) {
+      console.log(error);
+
+      setError("Please select specific event");
+
+      return;
+    }
     const tickets = await findTickets(data as FindTicketsDto);
 
     setTickets(tickets);
-    console.log(tickets);
   };
 
   return (
@@ -107,6 +114,8 @@ function FindTickets() {
             <button type="submit" className="btn btn-primary w-full mt-4">
               Search
             </button>
+
+            {error !== "" && <div className="text-center mt-4">{error}</div>}
           </form>
 
           {tickets && tickets.length === 0 && selectedEvent && (
@@ -128,36 +137,37 @@ function FindTickets() {
               Back
             </button>
           </div>
-          {tickets.map((ticket) => (
-            <div
-              key={ticket.id}
-              className="border border-gray-300 rounded-md shadow-md p-4 mb-4 bg-white"
-            >
-              <h3 className="text-lg font-semibold">{ticket.event.title}</h3>
-              <p>
-                Event Date: {formatDate(ticket.event.startDate)}
-                <br />
-                Location: {ticket.event.location}
-                <br />
-                Ticket Type: {ticket.type}
-                <br />
-                Status: <span className="capitalize">{ticket.status}</span>
-                <br />
-                Price: ${ticket.price}
-              </p>
-              <p>
-                Customer: {ticket.customerName}
-                <br />
-                Bought: {formatDate(ticket.createdAt)}
-                <br />
-                Email: {ticket.customerEmail}
-              </p>
-              <div className="text-end">
-                <button className="mt-2 btn btn-sm btn-primary">Get ticket</button>
-              </div>
-              {/* ... other ticket details */}
+          <div
+            key={tickets[0].id}
+            className="border border-gray-300 rounded-md shadow-md p-4 mb-4 bg-white"
+          >
+            <h3 className="text-lg font-semibold">{tickets[0].event.title}</h3>
+            <p>
+              Event Date: {formatDate(tickets[0].event.startDate)}
+              <br />
+              Location: {tickets[0].event.location}
+              <br />
+              Ticket Type: {tickets[0].type}
+              <br />
+              Status: <span className="capitalize">{tickets[0].status}</span>
+              <br />
+              Price: ${tickets[0].price}
+            </p>
+            <p>
+              Customer: {tickets[0].customerName}
+              <br />
+              Bought: {formatDate(tickets[0].createdAt)}
+              <br />
+              Email: {tickets[0].customerEmail}
+              <br />
+              <strong>Quantity</strong>: {tickets.length}
+            </p>
+            <div className="text-end">
+              <button className="mt-2 btn btn-sm btn-primary">Get ticket</button>
             </div>
-          ))}
+
+            {/* ... other ticket details */}
+          </div>
         </div>
       )}
     </div>

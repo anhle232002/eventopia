@@ -13,8 +13,6 @@ function PaymentSuccess() {
     return null;
   }
 
-  console.log(data);
-
   return (
     <div className="flex justify-center items-center min-h-screen">
       <div className="max-w-2xl bg-white p-8 rounded-lg shadow-lg">

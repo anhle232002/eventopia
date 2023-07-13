@@ -1,5 +1,4 @@
 import { registerOrganizer } from "@/api/register-organizer";
-import MainLayout from "@/components/layouts/MainLayout";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 

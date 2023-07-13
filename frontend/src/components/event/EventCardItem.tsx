@@ -15,7 +15,7 @@ function EventCardItem({ event }: { event: any }) {
 
         <p className="text-sm text-primary mt-3">{formatDate(event.startDate)}</p>
 
-        <div className="text-sm opacity-80 mt-3">Starts at ${event.price}</div>
+        <div className="text-sm opacity-80 mt-3">Starts at ${event.ticketPrice}</div>
 
         <div className="font-semibold text-sm mt-1">{event.location}</div>
 
