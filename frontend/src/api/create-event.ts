@@ -28,7 +28,7 @@ export const createEvent = async (createEventDto: CreateEventDto) => {
     }
   });
 
-  formdata.append("images", createEventDto.images[0]);
+  formdata.append("imageFiles", createEventDto.images[0]);
 
   const response = await axios.post("/events", formdata);
 

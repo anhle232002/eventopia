@@ -13,10 +13,10 @@ function Events() {
       <h1 className="text-3xl font-semibold">Your Events</h1>
 
       {!isLoading && data?.events && (
-        <div className="mt-10">
+        <div className="mt-10  min-h-[70vh]">
           {data.events.length > 0 ? (
             <div>
-              <div className="flex flex-wrap gap-6 min-h-[70vh] bg-white shadow-md p-4">
+              <div className="flex flex-wrap gap-6 bg-white shadow-md p-4">
                 {data.events.map((event) => {
                   return (
                     <Link to={`/dashboard/events/edit/${event.slug}`} key={event.id}>

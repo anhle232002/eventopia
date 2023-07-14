@@ -1,8 +1,6 @@
 import { buyTicket, BuyTicketDto } from "@/api/buy-ticket";
-import EventCardItem from "@/components/event/EventCardItem";
-import MainLayout from "@/components/layouts/MainLayout";
 import { useEvent } from "@/hooks/useEvent";
-import { formatDate, formatDateShort } from "@/utils";
+import { formatDate, formatDateShort, formatDuration } from "@/utils";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLoaderData } from "react-router-dom";
@@ -53,7 +51,7 @@ function EventDetail() {
                     <div>
                       By <strong>{event.organizer.name}</strong>
                     </div>
-                    <div>11 followers</div>
+                    <div>{event.organizer._count.followers} followers</div>
                   </div>
                 </div>
 
@@ -133,7 +131,9 @@ function EventDetail() {
                   <span>
                     <i className="ri-hourglass-fill text-lg text-info"></i>
                   </span>
-                  <span className="text-sm font-semibold ml-4">{event.duration} Minutes</span>
+                  <span className="text-sm font-semibold ml-4">
+                    {formatDuration(event.duration)}
+                  </span>
                 </div>
 
                 <p className="mt-8">{event.description}</p>
@@ -172,7 +172,7 @@ function EventDetail() {
                   <div className="mt-4 text-xl font-bold">{event.organizer.name}</div>
 
                   <div className="text-center mt-6">
-                    <div className="font-bold">11</div>
+                    <div className="font-bold">{event.organizer._count.followers}</div>
                     <div className="text-sm opacity-80">Followers</div>
                   </div>
 

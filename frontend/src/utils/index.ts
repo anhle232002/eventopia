@@ -31,3 +31,19 @@ export const getDuration = (duration: { hour: string; day: string; minute: strin
 
   return result;
 };
+
+export const formatDuration = (duration: string) => {
+  let res = "";
+  for (let i = 0; i < duration.length; i++) {
+    if (duration[i] === "d") {
+      res += " Days ";
+    } else if (duration[i] === "h") {
+      res += " Hours ";
+    } else if (duration[i] === "m") {
+      res += " Minutes ";
+    } else {
+      res += duration.charAt(i);
+    }
+  }
+  return res;
+};

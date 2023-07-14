@@ -1,4 +1,5 @@
 import { registerOrganizer } from "@/api/register-organizer";
+import storage from "@/utils/storage";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -10,7 +11,6 @@ function RegisterOrganizer() {
   const [error, setError] = useState("");
   const [isloading, setIsLoading] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
-  const navigate = useNavigate();
 
   const handleSubmitForm = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -25,7 +25,9 @@ function RegisterOrganizer() {
 
         setIsLoading(false);
 
-        navigate("/dashboard");
+        storage.clear("token");
+
+        window.open("/dashboard");
       }
     } catch (err: any) {
       console.log(err);
