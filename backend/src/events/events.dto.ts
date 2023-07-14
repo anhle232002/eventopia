@@ -11,6 +11,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  ValidateIf,
 } from 'class-validator';
 import { TransformDate, Trim } from 'src/common/decorators/validation.decorator';
 
@@ -87,6 +88,7 @@ export class CreateEventDto {
   @ApiProperty()
   @Trim()
   @IsString()
+  @ValidateIf((object) => !object.isOnlineEvent)
   location: string;
 
   @ApiProperty({ description: 'Datetime string, example: "1688962912000"' })

@@ -45,10 +45,9 @@ export class EventsController {
   @CacheTTL(6 * HOUR)
   @HttpCode(200)
   async getEvents(@Req() req: Request, @Query() query: GetEventsQuery) {
-    const events = await this.eventService.getEvents(query);
-    const totalCounts = await this.eventService.getTotalCount();
+    const { events, total } = await this.eventService.getEvents(query);
 
-    return { results: events, page: query.page, count: events.length, total: totalCounts };
+    return { results: events, page: query.page, count: events.length, total: total };
   }
 
   @Get(':id')
@@ -75,6 +74,8 @@ export class EventsController {
     createEventDto.organizerId = user.organizer.id;
 
     const event = await this.eventService.createEvent(createEventDto, imageFiles);
+
+    this.redisCache.deleteKeysPrefix('/api/events');
 
     return event;
   }

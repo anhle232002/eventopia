@@ -35,7 +35,10 @@ export class PDFTicketGenerator implements TicketGenerator {
 
   async generate(data: { template: string; content: PDFTicketContent }) {
     try {
-      const browser = await puppeteer.launch({ headless: 'new' });
+      const browser = await puppeteer.launch({
+        headless: 'new',
+        args: ['--no-sandbox', '--disabled-setupid-sandbox'],
+      });
       const page = await browser.newPage();
       const qrcode = await QRCode.toDataURL(data.content.ticketVerifyUrl);
       const content = await this.compile(data.template, { ...data.content, qrcode });

@@ -21,8 +21,8 @@ export class CreateAccountInput {
   userId: string;
   providerType: string;
   providerAccountId: string;
+  verified: boolean;
   locale: string;
   accessToken?: string;
   refreshToken?: string;
-  verified: boolean;
 }

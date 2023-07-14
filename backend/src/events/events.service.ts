@@ -98,9 +98,12 @@ export class EventsService {
       query.where.title = { contains: search };
     }
 
-    const events = await this.prisma.event.findMany(query);
+    const [events, total] = await Promise.all([
+      this.prisma.event.findMany(query),
+      this.prisma.event.count({ where: query.where }),
+    ]);
 
-    return events;
+    return { events, total };
   }
 
   async getEvent(id: number) {

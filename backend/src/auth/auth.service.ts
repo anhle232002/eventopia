@@ -37,6 +37,14 @@ export class AuthService {
       password: signupDto.password,
     });
 
+    await this.usersService.createAccount({
+      userId: newUser.id,
+      providerType: 'local',
+      providerAccountId: null,
+      verified: false,
+      locale: '',
+    });
+
     if (signupDto.isOrganizer && signupDto.organizer) {
       await this.organizerService.create({
         description: signupDto.organizer.description,
