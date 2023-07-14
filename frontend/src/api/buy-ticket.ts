@@ -8,8 +8,6 @@ export type BuyTicketDto = {
 };
 
 export const buyTicket = async (eventId: number, buyTicketDto: BuyTicketDto) => {
-  console.log(buyTicketDto);
-
   const response = await axios.post(`/payment/events/${eventId}/tickets`, buyTicketDto);
 
   return response.data;

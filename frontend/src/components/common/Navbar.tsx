@@ -9,7 +9,6 @@ function Navbar() {
   const logout = async () => {
     await logoutMutation.mutateAsync();
   };
-  console.log(user);
 
   const handleOnCreateEvent = () => {
     if (!user) {

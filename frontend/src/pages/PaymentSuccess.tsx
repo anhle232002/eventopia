@@ -5,12 +5,23 @@ function PaymentSuccess() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const sessionId = searchParams.get("session_id");
-  const { data } = usePaymentSession(sessionId!);
+  const { data, isLoading } = usePaymentSession(sessionId!);
+  console.log(data);
 
   if (!sessionId || sessionId === "") {
     navigate("/");
 
     return null;
+  }
+
+  if (isLoading) {
+    return (
+      <div>
+        <div className="mt-10 p-10 center">
+          <span className="loading loading-spinner loading-lg"></span>
+        </div>
+      </div>
+    );
   }
 
   return (
