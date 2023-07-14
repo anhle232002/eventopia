@@ -13,8 +13,13 @@ Eventopia provides a platform to discover, create events in your local community
 ## Key Features
 
 <li> Event Discovery: Easily browse and search event </li>
-<li> Event Discovery: Easily browse and search event </li>
-<li> Event Discovery: Easily browse and search event </li>
+<li> Ticket Purchase: Users can buy tickets for events. </li>
+<li> Ticket Finding: Users can find their tickets for events. </li>
+<li> Organizer Role: Users can become event organizers. </li>
+<li> Event Creation: Organizers can create new events. </li>
+<li> Event Updates: Organizers can update event details. </li>
+<li> Entry Management: Organizers can scan QR codes to manage attendee entry. </li>
+<li> Event Notifications: Reminding user about their upcoming events  </li>
 
 ## Installation
 
