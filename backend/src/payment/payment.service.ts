@@ -69,11 +69,12 @@ export class PaymentService {
       currency: 'usd',
       mode: 'payment',
       cancelUrl:
-        (this.configService.get('DOMAIN') || 'http://localhost:3000/api/payment') +
-        `/cancel/${checkOutTicketDto.eventId}?q=${checkOutTicketDto.quantity}`,
-      sucessUrl:
-        (this.configService.get('DOMAIN') || this.configService.get('CLIENT_URL')) +
-        '/payment/success?session_id={CHECKOUT_SESSION_ID}',
+        process.env.NODE_ENV === 'production'
+          ? `${this.configService.get('HOST_NAME')}/api/payment/cancel/${checkOutTicketDto.eventId}?q=${
+              checkOutTicketDto.quantity
+            }`
+          : `http://localhost:3000/api/payment/cancel/${checkOutTicketDto.eventId}?q=${checkOutTicketDto.quantity}`,
+      sucessUrl: `${this.configService.get('CLIENT_URL')}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
     });
   }
 
@@ -81,7 +82,7 @@ export class PaymentService {
     try {
       return this.stripeService.constructEvent(payload, signature);
     } catch (error) {
-      console.log(error);
+      Logger.error(error);
 
       throw new HttpException(`Webhook Error: ${error.message}`, 400);
     }
@@ -141,10 +142,15 @@ export class PaymentService {
     return this.eventService.releaseReservedTickets(Number(metadata.eventId), Number(metadata.quantity));
   }
 
+  async handleOnPaymentFailed(event: Stripe.Event) {
+    const { metadata } = await this.stripeService.retrieveSessionWithItems((event.data.object as any).id);
+
+    return this.eventService.releaseReservedTickets(Number(metadata.eventId), Number(metadata.quantity));
+  }
+
   handleOnCheckOutSessionCanceled(eventId: number, quantity: number) {
     return this.eventService.releaseReservedTickets(eventId, quantity);
   }
-
   async getPaymentSession(sessionId: string) {
     const session = await this.stripeService.retrieveSessionWithItems(sessionId);
 

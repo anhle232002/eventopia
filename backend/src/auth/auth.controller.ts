@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Logger, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
@@ -13,7 +14,11 @@ import { LocalStrategy } from './strategies/local.strategy';
 @ApiTags('Authenticate')
 @Controller('/api/auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService, private readonly userService: UsersService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UsersService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @ApiBearerAuth()
   @ApiOperation({ description: 'Get user data' })
@@ -74,8 +79,7 @@ export class AuthController {
       maxAge: COOKIE_AGE,
     });
 
-    // TODO: change this url
-    res.redirect('http://localhost:5173');
+    res.redirect(this.configService.get('CLIENT_URL'));
   }
 
   @ApiBearerAuth()

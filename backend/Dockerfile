@@ -14,8 +14,6 @@ COPY . ./
 
 COPY .env.prisma .env
 
-EXPOSE 3000
-
 RUN npm run build
 
 CMD [ "npm", "run", "start:migrate:prod" ]

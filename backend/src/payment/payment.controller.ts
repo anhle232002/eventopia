@@ -1,4 +1,3 @@
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
   Body,
   Controller,
@@ -11,10 +10,14 @@ import {
   Post,
   Query,
   RawBodyRequest,
+  Redirect,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Response } from 'express';
 import { ReqUser } from 'src/common/decorators/req-user.decorator';
 import { OptionalJWT } from 'src/common/guards/optional-jwt.guard';
 import { RequestUser } from 'src/users/users.dto';
@@ -24,10 +27,14 @@ import { PaymentService } from './payment.service';
 @ApiTags('Payment')
 @Controller('/api/payment')
 export class PaymentController {
-  constructor(private readonly paymentService: PaymentService) {}
+  constructor(
+    private readonly paymentService: PaymentService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @ApiOperation({ description: 'Buy tickets' })
   @Post('/events/:eventId/tickets')
+  @UseGuards(OptionalJWT)
   async buyTicket(
     @Body() buyTicketDto: BuyTicketDto,
     @Param('eventId', ParseIntPipe) eventId: number,
@@ -55,9 +62,16 @@ export class PaymentController {
         return 'Success';
       }
       case 'checkout.session.expired': {
-        Logger.log('SESSION EXPIRED');
+        Logger.log(`SESSION EXPIRED ${event.id}`);
 
         await this.paymentService.handleOnCheckoutSessionExpired(event);
+
+        break;
+      }
+      case 'payment_intent.payment_failed': {
+        Logger.log(`PAYMENT FAILED: ${event.id}`);
+
+        await this.paymentService.handleOnPaymentFailed(event);
 
         break;
       }
@@ -70,10 +84,11 @@ export class PaymentController {
   async cancelCheckoutSession(
     @Param('eid', ParseIntPipe) eventId: number,
     @Query('q', ParseIntPipe) quantity: number,
+    @Res({ passthrough: true }) res: Response,
   ) {
     await this.paymentService.handleOnCheckOutSessionCanceled(eventId, quantity);
 
-    return 'Canceled session';
+    res.redirect(this.configService.get('CLIENT_URL'));
   }
 
   @ApiOperation({ description: 'Get payment session' })
