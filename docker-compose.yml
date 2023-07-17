@@ -26,6 +26,7 @@ services:
     depends_on:
       - redis
       - database
+    restart: always
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -37,6 +38,7 @@ services:
       - REDIS_PORT=6379
       - REDIS_URL=redis://redis:6379
       - REDIS_PASSWORD=abc
+      - REDIS_HOST=redis
     ports:
       - 3000:3000
 
