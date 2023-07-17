@@ -53,11 +53,28 @@ export class TicketProcessor {
   async sendETicket(job: Job) {
     try {
       const tickets = job.data as (Ticket & { event: Partial<Event> })[];
-      console.log(tickets);
 
+      // Download pdf from cloud (deprecated)
+      // const files = await Promise.all(
+      //   tickets.map((ticket) => {
+      //     return this.cloudinaryService.downloadFile(ticket.pdfUrl, `${ticket.id}.pdf`);
+      //   }),
+      // );
       const files = await Promise.all(
-        tickets.map((ticket) => {
-          return this.cloudinaryService.downloadFile(ticket.pdfUrl, `${ticket.id}.pdf`);
+        tickets.map(async (ticket) => {
+          const pdfContent: PDFTicketContent = {
+            attendeeName: ticket.customerName,
+            eventCity: ticket.event.city,
+            eventCountry: ticket.event.country,
+            eventDate: this.utilService.formatLocaleDate(ticket.event.startDate),
+            eventDuration: ticket.event.duration,
+            eventLocation: ticket.event.location,
+            eventName: ticket.event.title,
+            ticketId: ticket.id,
+            ticketType: ticket.type,
+            ticketVerifyUrl: await this.ticketService.getTicketVerifyUrl(ticket.id),
+          };
+          return this.ticketService.createETicket('PDF', { template: 'pdf-ticket.hbs', content: pdfContent });
         }),
       );
 
@@ -84,7 +101,7 @@ export class TicketProcessor {
         attachDataUrls: false,
       };
 
-      this.notificationQueue.add('send-email', email);
+      this.notificationQueue.add('send-email', { notification: email });
     } catch (error) {
       Logger.error(error);
     }

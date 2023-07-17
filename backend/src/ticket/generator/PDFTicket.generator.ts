@@ -37,7 +37,8 @@ export class PDFTicketGenerator implements TicketGenerator {
     try {
       const browser = await puppeteer.launch({
         headless: 'new',
-        args: ['--no-sandbox', '--disabled-setupid-sandbox'],
+        executablePath: '/usr/bin/google-chrome',
+        args: ['--no-sandbox', '--disable-gpu'],
       });
       const page = await browser.newPage();
       const qrcode = await QRCode.toDataURL(data.content.ticketVerifyUrl);
@@ -53,7 +54,7 @@ export class PDFTicketGenerator implements TicketGenerator {
       await page.pdf({ path: fileName, format: 'a5', printBackground: true });
 
       await browser.close();
-
+      Logger.log('print pdf succes');
       return fileName;
     } catch (error) {
       Logger.error(error);

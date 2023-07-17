@@ -81,14 +81,9 @@ export class TicketController {
     return { message: allow ? 'Allowed' : 'Rejected', status: 'success' };
   }
 
-  /**
-   * Cloud does not support for pdf delivery
-   * @param sendETicketDto
-   * @returns message
-   */
   @Post('send-ticket')
   @UseGuards(ThrottlerGuard)
-  @Throttle(5, 60 * 60)
+  @Throttle(3, 60 * 60)
   async sendETicket(@Body() sendETicketDto: SendETicketDto) {
     await this.ticketService.sendETickets(sendETicketDto);
 
