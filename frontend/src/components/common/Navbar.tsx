@@ -29,11 +29,11 @@ function Navbar() {
         <Link
           to="/search"
           role="button"
-          className="flex items-center gap-2 px-4 py-2 bg-[#fafafa] rounded w-[400px]"
+          className="flex items-center gap-2 px-4 py-2 bg-[#fafafa] rounded lg:w-[400px]"
         >
           <i className="ri-search-line"></i>
 
-          <div className="text-sm">Search events</div>
+          <div className="text-sm md:block hidden">Search events</div>
         </Link>
       </div>
 
@@ -41,7 +41,7 @@ function Navbar() {
         <div
           role="button"
           onClick={handleOnCreateEvent}
-          className="h-full center px-3 hover:bg-[#fafafa]"
+          className="h-full md:center px-3 hover:bg-[#fafafa]  hidden"
         >
           <div>Create an event</div>
         </div>
@@ -64,6 +64,12 @@ function Navbar() {
                 className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
               >
                 <li>
+                  <a href="/dashboard" className="py-3">
+                    <i className="ri-profile-fill text-xl"></i>
+                    <span className="ml-2">Create Event</span>
+                  </a>
+                </li>
+                <li>
                   <a className="py-3">
                     <i className="ri-profile-fill text-xl"></i>
                     <span className="ml-2">Profile</span>
@@ -83,20 +89,6 @@ function Navbar() {
                 </li>
               </ul>
             </div>
-
-            {/* <ul className="menu menu-sm bg-base-200 w-44 rounded-box absolute z-50 top-[100%] mt-2 right-0 group-hover:opacity-100 opacity-0 duration-200">
-              <li>
-                <a className="py-3">Profile</a>
-              </li>
-              <li>
-                <a className="py-3">Settings</a>
-              </li>
-              <li>
-                <a onClick={logout} className="py-3">
-                  Logout
-                </a>
-              </li>
-            </ul> */}
           </div>
         ) : (
           <>
