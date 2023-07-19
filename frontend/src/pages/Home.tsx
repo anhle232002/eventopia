@@ -24,7 +24,7 @@ function Home() {
 
   const [query, setQuery] = useState({});
   const [selectedTab, setSelectedTab] = useState(0);
-  const { data } = useEvents({ ...query });
+  const { data, isLoading } = useEvents({ ...query });
 
   function handleGetLocation() {
     if (navigator.geolocation) {
@@ -53,12 +53,12 @@ function Home() {
         }}
         className="h-[550px] bg-no-repeat bg-cover relative"
       >
-        <button className="btn btn-primary absolute btn-sm bottom-5 left-60">
+        <button className="btn btn-primary absolute btn-sm md:bottom-5 md:left-60 bottom-4 left-4">
           Find your next event
         </button>
       </div>
 
-      <div className="max-w-6xl m-auto mt-10 min-h-[500px]">
+      <div className="max-w-6xl m-auto mt-10 min-h-[500px] px-4">
         <div className="text-2xl">
           <strong>Popular in</strong>
           <span className="ml-4 underline">
@@ -97,7 +97,7 @@ function Home() {
             {(selectedTab === tabs.length - 1 && hasLocation) || selectedTab !== tabs.length - 1 ? (
               <div>
                 {data && data.events.length > 0 ? (
-                  <div className="flex gap-8 flex-wrap">
+                  <div className="grid gap-8 lg:grid-cols-4 md:grid-cols-3 grid-cols-1">
                     {data.events.map((event) => {
                       return (
                         <Link to={`/e/${event.slug}`}>
@@ -121,7 +121,7 @@ function Home() {
             )}
           </div>
 
-          <div className="text-right">
+          <div className="text-right mt-4">
             <Link to="/search">
               <button className="btn btn-primary btn-sm">See more</button>
             </Link>
