@@ -14,7 +14,7 @@ function EventDetail() {
       {isLoading && <div>loading...</div>}
 
       {!isLoading && event && (
-        <div className="max-w-6xl m-auto py-8">
+        <div className="max-w-6xl m-auto py-8 px-4">
           <div className="h-[450px] relative rounded-xl overflow-hidden">
             <div
               style={{
@@ -29,8 +29,8 @@ function EventDetail() {
             />
           </div>
 
-          <div className="grid grid-cols-12 gap-8 mt-10">
-            <div className=" col-span-8">
+          <div className="grid md:grid-cols-12 grid-cols-1 gap-8 mt-10">
+            <div className="md:col-span-8">
               <span className="font-semibold">{formatDateShort(event.startDate)}</span>
 
               <h1 className="font-bold text-5xl">{event.title}</h1>
@@ -185,8 +185,8 @@ function EventDetail() {
               </section>
             </div>
 
-            <div className="col-span-4 relative">
-              <div className="text-end">
+            <div className="md:col-span-4 relative ">
+              <div className="text-end md:block hidden">
                 <i role="button" className="ri-heart-line text-xl"></i>
               </div>
 
@@ -197,7 +197,7 @@ function EventDetail() {
                   onClick={() => {
                     (window as any).payment_modal.showModal();
                   }}
-                  className="w-full bg-primary py-2 text-white rounded-md"
+                  className="w-full bg-primary py-2 px-4 text-white rounded-md"
                 >
                   Get tickets
                 </button>
@@ -238,6 +238,8 @@ export const PaymentForm = ({ eventId }: { eventId: number }) => {
     setIsLoading(false);
 
     window.open(responseData.url);
+
+    (window as any).payment_modal.close();
   };
 
   return (
@@ -308,6 +310,7 @@ export const PaymentForm = ({ eventId }: { eventId: number }) => {
             Close
           </button>
           <button type="submit" className="btn btn-primary mt-4 btn-sm px-10">
+            {isLoading && <span className="loading loading-spinner"></span>}
             Pay
           </button>
         </div>

@@ -1,25 +1,39 @@
-import { useUser } from "@/libs/auth";
+import { useLogout, useUser } from "@/libs/auth";
 import { useEffect, useState } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 
 function DashBoard() {
-  const navigate = useNavigate();
   const { data: user, isLoading } = useUser();
+  const logoutMutation = useLogout();
+  const navigate = useNavigate();
 
+  const logout = async () => {
+    await logoutMutation.mutateAsync();
+
+    navigate("/", { replace: true });
+  };
   if (!isLoading && !user) {
     navigate("/", { replace: true });
   }
   return (
     <div>
-      <div className="drawer lg:drawer-open">
-        <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
+      <div className="drawer  md:drawer-open">
+        <input id="my-drawer" type="checkbox" className="drawer-toggle" />
+
         <div className="drawer-content">
+          <label
+            htmlFor="my-drawer"
+            className="btn btn-primary btn-sm btn-circle m-4 drawer-button md:hidden"
+          >
+            <i className="ri-menu-line text-lg"></i>
+          </label>
           <Outlet />
         </div>
 
         <div className="drawer-side border-r border-neutral/20">
-          <label htmlFor="my-drawer-2" className="drawer-overlay"></label>
-          <div className="menu p-4 w-80 h-full bg-white text-base-content text-lg justify-between">
+          <label htmlFor="my-drawer" className="drawer-overlay"></label>
+
+          <ul className="menu p-4 lg:w-80 md:w-64 h-full bg-white text-base-content text-lg justify-between">
             <div>
               <li>
                 <Link to="/dashboard" className="py-3">
@@ -62,12 +76,12 @@ function DashBoard() {
               </li>
 
               <li>
-                <Link to="/dashboard/create-event" className="py-3">
+                <div onClick={() => logout()} className="py-3">
                   Logout
-                </Link>
+                </div>
               </li>
             </div>
-          </div>
+          </ul>
         </div>
       </div>
     </div>
