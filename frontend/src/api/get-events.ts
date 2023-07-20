@@ -7,6 +7,7 @@ export type GetEventsQuery = {
   status?: string;
   search?: string;
   organizer?: string;
+  category?: number;
 };
 
 export type GetEventResponse = {

@@ -1,4 +1,5 @@
 import EventRowCardItem from "@/components/event/EventRowCardItem";
+import { useCategories } from "@/hooks/useCategories";
 import { useEvents } from "@/hooks/useEvents";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -13,8 +14,11 @@ function SearchEvents() {
     date: params.get("date") || undefined,
     status: params.get("status") || undefined,
     search: params.get("q") || undefined,
+    category: Number(params.get("category")) || undefined,
   });
 
+  const { data: categories, isLoading: isCategoriesLoading } = useCategories({ order: "" });
+  const [showMoreCategories, setShowMoreCategories] = useState(false);
   const setDateQuery = (value: string) => {
     setParams((params) => {
       if (value) {
@@ -40,7 +44,7 @@ function SearchEvents() {
   };
 
   return (
-    <div className="max-w-7xl m-auto py-10">
+    <div className="max-w-7xl m-auto py-10 px-4">
       <div className="">
         <div className="flex items-center gap-4 px-4 py-3 bg-[#fafafa] rounded shadow-md">
           <input
@@ -67,8 +71,8 @@ function SearchEvents() {
         </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-12 mt-8 items-start">
-        <div className="col-span-4 bg-white p-4 rounded-md shadow-md">
+      <div className="grid md:grid-cols-12 grid-cols-1 gap-12 mt-8 items-start">
+        <div className="md:col-span-4 col-span-1 bg-white p-4 rounded-md shadow-md">
           <h3 className="font-semibold text-lg">Filters</h3>
           <div className="mt-8">
             <div className="form-control">
@@ -214,9 +218,51 @@ function SearchEvents() {
               </label>
             </div>
           </div>
+
+          <div className="mt-4">
+            <h4>Categories</h4>
+
+            <div>
+              {!isCategoriesLoading &&
+                categories &&
+                categories.slice(0, showMoreCategories ? undefined : 10).map((category) => {
+                  return (
+                    <div key={category.id} className="form-control">
+                      <label className="label space-x-4 cursor-pointer justify-start">
+                        <input
+                          type="radio"
+                          name="category"
+                          value={category.id}
+                          checked={Number(params.get("category")) === category.id}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setParams((p) => {
+                                p.set("category", category.id);
+
+                                return p;
+                              });
+                            }
+                          }}
+                          className="radio radio-sm checked:bg-blue-500"
+                        />
+                        <span className="label-text">{category.name}</span>
+                      </label>
+                    </div>
+                  );
+                })}
+
+              <div
+                role="button"
+                onClick={() => setShowMoreCategories((v) => !v)}
+                className="text-sm text-primary mt-2 text-center"
+              >
+                View {showMoreCategories ? "less" : "more"}
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="col-span-8">
+        <div className="md:col-span-8">
           {!isLoading && data && data.events.length > 0 && (
             <div>
               <div className="space-y-10">
