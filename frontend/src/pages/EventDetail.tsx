@@ -2,19 +2,28 @@ import { buyTicket, BuyTicketDto } from "@/api/buy-ticket";
 import { useEvent } from "@/hooks/useEvent";
 import { useLikedEvents } from "@/hooks/useLikedEvents";
 import { useLikeEvent } from "@/hooks/useLikeEvent";
+import { useUser } from "@/libs/auth";
 import { formatDate, formatDateShort, formatDuration } from "@/utils";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
 import { useLoaderData } from "react-router-dom";
 
 function EventDetail() {
   const id = useLoaderData();
+  const { data: user } = useUser();
   const { data: event, isLoading } = useEvent(Number(id));
   const { data: likedEvents } = useLikedEvents();
   const isLikedEvent = !!likedEvents && likedEvents.has(event.id);
   const likeEventMutation = useLikeEvent();
 
   const likeEvent = async () => {
+    if (!user) {
+      (window as any).login_required_modal.showModal();
+
+      return;
+    }
+
     await likeEventMutation.mutateAsync({ eventId: Number(event.id), like: !isLikedEvent });
   };
 
@@ -235,6 +244,20 @@ function EventDetail() {
 
       <dialog id="payment_modal" className="modal ">
         <PaymentForm eventId={event?.id} />
+      </dialog>
+
+      <dialog id="login_required_modal" className="modal">
+        <form method="dialog" className="modal-box">
+          <h3 className="font-bold text-lg">Login Required!</h3>
+          <p className="py-4">You need to log in to like event. Login now.</p>
+          <div className="modal-action">
+            <button className="btn">Cancel</button>
+
+            <Link to="/login" className="btn">
+              Login
+            </Link>
+          </div>
+        </form>
       </dialog>
     </div>
   );
