@@ -97,6 +97,7 @@ model Event {
   isOnlineEvent    Boolean?        @map("is_online_event")
   onlineUrl        String?         @default("")
   images           Json?           @default("[]") @map("images")
+  agenda           Json?
   startDate        DateTime        @default(now()) @map("start_date")
   createdAt        DateTime        @default(now()) @map("created_at")
   updatedAt        DateTime        @updatedAt @map("updated_at")
@@ -109,6 +110,7 @@ model Event {
   TicketType       TicketType[]
   looks            UserLookEvent[]
   tags             Tag[]
+  categories       Category[]
 }
 
 model TicketType {
@@ -152,5 +154,11 @@ model Review {
 model Tag {
   id     Int     @id @default(autoincrement())
   name   String
+  events Event[]
+}
+
+model Category {
+  id     Int     @id @default(autoincrement())
+  name   String  @unique
   events Event[]
 }

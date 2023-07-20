@@ -1,6 +1,8 @@
-import { Event, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import bcrypt from 'bcrypt';
+import { categories } from './seed-data/categories';
+import { locations } from './seed-data/location';
 const prisma = new PrismaClient();
 
 function slugify(str) {
@@ -30,7 +32,8 @@ prisma.$use(async (params, next) => {
 const generateEvents = async (organizerId: string) => {
   await prisma.event.deleteMany();
 
-  for (let i = 0; i <= 50; i++) {
+  for (let i = 0; i <= 100; i++) {
+    const randomLocation = Math.floor(Math.random() * 3);
     await prisma.event.create({
       data: {
         organizerId,
@@ -41,15 +44,28 @@ const generateEvents = async (organizerId: string) => {
         images: [{ url: faker.image.urlPicsumPhotos({ width: 950, height: 450 }) }],
         totalTickets: 100,
         ticketPrice: 20,
-        city: 'Danang',
+        city: locations[randomLocation].city,
         duration: '60m',
-        country: 'VietNam',
+        country: locations[randomLocation].country,
         isCancelled: false,
         isOnlineEvent: Date.now() % 2 == 0,
         language: 'vi',
         sold: 0,
-        timezone: 'Asia/Ho_Chi_Minh',
-        startDate: faker.date.between({ from: '2023-07-01T00:00:00.000Z', to: '2023-08-30T00:00:00.000Z' }),
+        latitude: faker.location.latitude({
+          min: locations[randomLocation].lat[0],
+          max: locations[randomLocation].lat[1],
+        }),
+        longtitude: faker.location.longitude({
+          min: locations[randomLocation].long[0],
+          max: locations[randomLocation].long[1],
+        }),
+        timezone: locations[randomLocation].timezone,
+        startDate: faker.date.between({ from: '2023-07-020T00:00:00.000Z', to: '2023-08-30T00:00:00.000Z' }),
+        categories: {
+          connect: {
+            name: categories[Math.floor(Math.random() * 40)].name,
+          },
+        },
       },
     });
   }
@@ -66,6 +82,14 @@ async function generateAdmin() {
       role: 'organizer',
       picture: faker.image.avatar(),
       password: bcrypt.hashSync('123123', 10),
+      accounts: {
+        create: {
+          providerType: 'local',
+          verified: false,
+          providerAccountId: '',
+          locale: 'vi',
+        },
+      },
     },
   });
 
@@ -83,8 +107,14 @@ async function generateAdmin() {
   return organizer.id;
 }
 
+async function generateCategories() {
+  await prisma.category.createMany({ data: categories });
+}
+
 async function main() {
+  // await prisma.$executeRaw`DROP DATABASE IF EXISTS EVENTS_AROUND;`;
   const organizerId = await generateAdmin();
+  await generateCategories();
   await generateEvents(organizerId);
 }
 
