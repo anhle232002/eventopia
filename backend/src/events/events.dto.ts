@@ -1,14 +1,22 @@
 import { BadRequestException, HttpException, Optional } from '@nestjs/common';
 import { ApiProperty, PartialType, OmitType } from '@nestjs/swagger';
-import { Event, User } from '@prisma/client';
+import { Event, Prisma, User } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import {
+  ArrayMinSize,
+  isArray,
   IsArray,
   IsBoolean,
   IsDate,
+  IsInt,
+  IsJSON,
   IsLatitude,
   IsLongitude,
+  IsNotEmpty,
+  isNumber,
   IsNumber,
+  isNumberString,
+  IsObject,
   IsOptional,
   IsString,
   ValidateIf,
@@ -65,6 +73,20 @@ export class GetEventsQuery {
   @IsLongitude()
   @Transform(({ value }) => Number(value))
   long?: number;
+
+  @ApiProperty({ required: false, description: 'Category id', type: 'array', items: { type: 'int' } })
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(1)
+  @IsNotEmpty({ each: true })
+  @IsInt({
+    each: true,
+  })
+  @Transform((p) => {
+    if (isArray(p.value)) return p.value.map(Number);
+    if (isNumberString(p.value)) return [Number(p.value)];
+  })
+  category?: number[];
 }
 
 export class CreateEventDto {
@@ -149,6 +171,25 @@ export class CreateEventDto {
 
   @ApiProperty({ type: 'string', format: 'binary' })
   imageFiles: Express.Multer.File[];
+
+  @ApiProperty({
+    description:
+      'Event Agenda in JSON string, Ex: [{"startTime": "6:00 PM","endTime": "7:00 PM","title": "Welcome meeting"}]',
+    required: false,
+    type: 'string',
+  })
+  @IsOptional()
+  @IsObject({ each: true })
+  @Transform((p) => {
+    try {
+      console.log(JSON.parse(p.value));
+
+      return JSON.parse(p.value);
+    } catch (error) {
+      throw new BadRequestException('Agenda field must be a valid JSON string');
+    }
+  })
+  agenda: Prisma.JsonArray;
 }
 
 export interface EventIncludesOrganizer extends Partial<Event> {

@@ -6,7 +6,6 @@ import {
   HttpException,
   Inject,
   Injectable,
-  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { Event, Prisma } from '@prisma/client';
@@ -37,7 +36,7 @@ export class EventsService {
     @InjectQueue('notification') private readonly queue: Queue,
   ) {}
 
-  async getEvents({ page, date, online, organizer, lat, long, search }: GetEventsQuery) {
+  async getEvents({ page, date, online, organizer, lat, long, search, category }: GetEventsQuery) {
     const query: Prisma.EventFindManyArgs = {
       take: this.PAGE_SIZE,
       skip: this.PAGE_SIZE * (page - 1),
@@ -67,6 +66,9 @@ export class EventsService {
         slug: true,
         ticketPrice: true,
         _count: { select: { looks: true } },
+        categories: true,
+        createdAt: true,
+        updatedAt: true,
       },
       where: {},
       orderBy: {
@@ -98,6 +100,10 @@ export class EventsService {
       query.where.title = { contains: search };
     }
 
+    if (category) {
+      query.where.categories = { every: { id: { in: category } } };
+    }
+
     const [events, total] = await Promise.all([
       this.prisma.event.findMany(query),
       this.prisma.event.count({ where: query.where }),
@@ -120,6 +126,8 @@ export class EventsService {
           },
         },
         reviews: true,
+        categories: true,
+        _count: { select: { looks: true } },
       },
     });
 

@@ -1,12 +1,8 @@
-import { CacheInterceptor, CacheTTL, CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
   Body,
   Controller,
   Delete,
   Get,
-  HttpCode,
-  Inject,
-  Logger,
   Param,
   ParseFilePipe,
   ParseIntPipe,
@@ -18,10 +14,10 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { AuthGuard } from '@nestjs/passport';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { RedisCache } from 'cache-manager-redis-yet';
 import { Request } from 'express';
 import { Role } from 'src/common/constants/role.enum';
 import { ReqUser } from 'src/common/decorators/req-user.decorator';
@@ -32,6 +28,7 @@ import { RequestUser } from 'src/users/users.dto';
 import { CreateEventDto, GetEventsQuery, UpdateEventDto } from './events.dto';
 import { EventsService } from './events.service';
 import { imageFileValidations } from './events.validation';
+import { Prisma } from '@prisma/client';
 
 const HOUR = 60 * 60 * 1000;
 
@@ -43,7 +40,6 @@ export class EventsController {
   @Get()
   @UseInterceptors(CacheInterceptor)
   @CacheTTL(6 * HOUR)
-  @HttpCode(200)
   async getEvents(@Req() req: Request, @Query() query: GetEventsQuery) {
     const { events, total } = await this.eventService.getEvents(query);
 
@@ -75,7 +71,7 @@ export class EventsController {
 
     const event = await this.eventService.createEvent(createEventDto, imageFiles);
 
-    this.redisCache.deleteKeysPrefix('/api/events');
+    await this.redisCache.deleteKeysPrefix('/api/events');
 
     return event;
   }
@@ -95,12 +91,13 @@ export class EventsController {
     await this.eventService.updateEvent(id, updateEventDto, user, images);
 
     // clear cache
-    this.redisCache.deleteKeysPrefix('/api/events');
+    await this.redisCache.deleteKeysPrefix('/api/events');
 
     return { message: 'Update event successfully' };
   }
 
   // TODO: test
+  @ApiBearerAuth()
   @Delete(':id')
   @Roles(Role.Organizer)
   @UseGuards(AuthGuard('jwt'), RolesGuard)
