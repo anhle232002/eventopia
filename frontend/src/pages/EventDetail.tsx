@@ -1,5 +1,7 @@
 import { buyTicket, BuyTicketDto } from "@/api/buy-ticket";
 import { useEvent } from "@/hooks/useEvent";
+import { useLikedEvents } from "@/hooks/useLikedEvents";
+import { useLikeEvent } from "@/hooks/useLikeEvent";
 import { formatDate, formatDateShort, formatDuration } from "@/utils";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -8,6 +10,13 @@ import { useLoaderData } from "react-router-dom";
 function EventDetail() {
   const id = useLoaderData();
   const { data: event, isLoading } = useEvent(Number(id));
+  const { data: likedEvents } = useLikedEvents();
+  const isLikedEvent = !!likedEvents && likedEvents.has(event.id);
+  const likeEventMutation = useLikeEvent();
+
+  const likeEvent = async () => {
+    await likeEventMutation.mutateAsync({ eventId: Number(event.id), like: !isLikedEvent });
+  };
 
   return (
     <div>
@@ -187,7 +196,13 @@ function EventDetail() {
 
             <div className="md:col-span-4 relative ">
               <div className="text-end md:block hidden">
-                <i role="button" className="ri-heart-line text-xl"></i>
+                <button onClick={likeEvent} className="btn btn-circle">
+                  {isLikedEvent ? (
+                    <i role="button" className="ri-heart-fill text-xl"></i>
+                  ) : (
+                    <i role="button" className="ri-heart-line text-xl"></i>
+                  )}
+                </button>
               </div>
 
               <div className="text-center sticky w-full top-20">

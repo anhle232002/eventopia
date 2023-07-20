@@ -2,6 +2,7 @@ import EventCardItem from "@/components/event/EventCardItem";
 import TrendingCategories from "@/components/home/TrendingCategories";
 import { useCurrentLocation } from "@/hooks/useCurrentLocation";
 import { useEvents } from "@/hooks/useEvents";
+import { useLikedEvents } from "@/hooks/useLikedEvents";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -25,6 +26,7 @@ function Home() {
   const [query, setQuery] = useState({});
   const [selectedTab, setSelectedTab] = useState(0);
   const { data, isLoading } = useEvents({ ...query });
+  const { data: likedEvents } = useLikedEvents();
 
   function handleGetLocation() {
     if (navigator.geolocation) {
@@ -101,7 +103,11 @@ function Home() {
                     {data.events.map((event) => {
                       return (
                         <Link to={`/e/${event.slug}`}>
-                          <EventCardItem key={event.id} event={event} />
+                          <EventCardItem
+                            liked={(likedEvents && likedEvents.has(event.id)) || false}
+                            key={event.id}
+                            event={event}
+                          />
                         </Link>
                       );
                     })}

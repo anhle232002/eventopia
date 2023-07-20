@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/common/providers/prisma.service';
-import { CreateAccountInput, CreateUserDTO } from './users.dto';
+import { CreateAccountInput, CreateUserDTO, RequestUser } from './users.dto';
 import bcrypt from 'bcrypt';
 @Injectable()
 export class UsersService {
@@ -26,7 +26,19 @@ export class UsersService {
   }
 
   createAccount(createAccountInput: CreateAccountInput) {
-    return this.prisma.account.create({ data: createAccountInput });
+    return this.prisma.account.create({
+      data: {
+        locale: createAccountInput.locale,
+        providerAccountId: createAccountInput.providerAccountId,
+        providerType: createAccountInput.providerType,
+        verified: createAccountInput.verified,
+        accessToken: createAccountInput.accessToken,
+        refreshToken: createAccountInput.refreshToken,
+        user: {
+          connect: { id: createAccountInput.userId },
+        },
+      },
+    });
   }
 
   findOneByEmail(email: string, exposePassword = false) {
@@ -67,5 +79,20 @@ export class UsersService {
     });
 
     return !!followed;
+  }
+
+  async getLikedEvents(user: RequestUser) {
+    const likedEvents = await this.prisma.user.findUnique({
+      where: { id: user.id },
+      select: {
+        looks: {
+          select: {
+            eventId: true,
+          },
+        },
+      },
+    });
+
+    return likedEvents;
   }
 }
