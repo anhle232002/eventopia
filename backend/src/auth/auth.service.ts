@@ -13,6 +13,7 @@ import { OrganizerService } from 'src/organizer/organizer.service';
 import { UsersService } from 'src/users/users.service';
 import { LoginWithGoogleDTO, SignUpDto } from './auth.dto';
 import bcrypt from 'bcrypt';
+import { randomUUID } from 'crypto';
 @Injectable()
 export class AuthService {
   constructor(
@@ -40,7 +41,7 @@ export class AuthService {
     await this.usersService.createAccount({
       userId: newUser.id,
       providerType: 'local',
-      providerAccountId: null,
+      providerAccountId: randomUUID(),
       verified: false,
       locale: '',
     });

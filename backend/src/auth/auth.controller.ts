@@ -2,6 +2,7 @@ import { Body, Controller, Get, Logger, Post, Req, Res, UseGuards } from '@nestj
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { Request, Response } from 'express';
 import { COOKIE_AGE } from 'src/common/constants';
 import { ReqUser } from 'src/common/decorators/req-user.decorator';
@@ -32,6 +33,8 @@ export class AuthController {
 
   @UseGuards(AuthGuard('local'))
   @Post('/login')
+  @UseGuards(ThrottlerGuard)
+  @Throttle(5, 5 * 60)
   async loginWithEmail(
     @Body() loginDto: LoginDto,
     @Req() req: Request,
