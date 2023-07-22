@@ -62,7 +62,8 @@ export class OrganizerController {
     const organizer = await this.organizerService.findOne(id);
 
     let isFollowedByYou = null;
-    if (!user) {
+
+    if (user) {
       isFollowedByYou = this.usersService.isFollowingOrganizer(user.id, organizer.id);
     }
 
