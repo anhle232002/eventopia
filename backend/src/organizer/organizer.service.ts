@@ -146,7 +146,20 @@ export class OrganizerService {
     const organizer = await this.prisma.organizer.findUnique({
       where: { id },
       select: {
-        followers: { take: size, select: { user: true }, skip: (page - 1) * size },
+        followers: {
+          take: size,
+          select: {
+            user: {
+              select: {
+                email: true,
+                givenName: true,
+                familyName: true,
+                picture: true,
+              },
+            },
+          },
+          skip: (page - 1) * size,
+        },
       },
     });
 
