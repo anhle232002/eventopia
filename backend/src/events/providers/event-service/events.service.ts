@@ -14,13 +14,14 @@ import { Queue } from 'bull';
 import { Role } from 'src/common/constants/role.enum';
 import { PrismaService } from 'src/common/providers/prisma.service';
 import { RequestUser } from 'src/users/users.dto';
-import { CreateEventDto, EmailReceiver, GetEventsQuery, ImageUrl, UpdateEventDto } from './events.dto';
+import { CreateEventDto, EmailReceiver, GetEventsQuery, ImageUrl, UpdateEventDto } from '../../events.dto';
 import { UtilService } from 'src/common/providers/util.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { RedisCache } from 'cache-manager-redis-yet';
 import { GeocodingService } from 'src/common/providers/geocoding/geocoding.service';
 import { CloudinaryService } from 'src/common/providers/cloudinary/cloudinary.service';
 import { EmailNotification } from 'src/common/providers/notification/notification.service';
+import { EventQueryBuilder } from '../event-query-builder/EventQueryBuilder';
 
 @Injectable()
 export class EventsService {
@@ -37,72 +38,25 @@ export class EventsService {
   ) {}
 
   async getEvents({ page, date, online, organizer, lat, long, search, category }: GetEventsQuery) {
-    const query: Prisma.EventFindManyArgs = {
-      take: this.PAGE_SIZE,
-      skip: this.PAGE_SIZE * (page - 1),
-      select: {
-        id: true,
-        title: true,
-        shortDescription: true,
-        images: true,
-        organizer: {
-          select: {
-            id: true,
-            picture: true,
-            name: true,
-            description: true,
-          },
-        },
-        location: true,
-        isCancelled: true,
-        isOnlineEvent: true,
-        venue: true,
-        language: true,
-        city: true,
-        country: true,
-        sold: true,
-        startDate: true,
-        duration: true,
-        slug: true,
-        ticketPrice: true,
-        _count: { select: { looks: true } },
-        categories: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-      where: {},
-      orderBy: {
-        startDate: Prisma.SortOrder.desc,
-      },
-    };
+    const queryBuilder = new EventQueryBuilder();
 
-    if (date) {
-      query.where.startDate = this.getDateQuery(date);
-    }
-
-    if (online) {
-      query.where.isOnlineEvent = true;
-    }
-
-    if (organizer) {
-      query.where.organizerId = organizer;
-    }
+    queryBuilder
+      .withPaginate(page)
+      .withDateRange(this.utilService.getDateRange(date))
+      .withCategory(category)
+      .withOnlyOnlineEvent(!!online)
+      .withOrganizer(organizer)
+      .withSearchTerm(search);
 
     if (lat && long) {
-      const { city, country, timezone } = await this.geocodingService.getLocation(lat, long);
+      const locationData = await this.geocodingService.getLocation(lat, long);
 
-      query.where.OR = query.where.OR
-        ? [...(query.where.OR as any[]), { timezone }, { country, city }]
-        : [{ timezone }, { country, city }];
+      queryBuilder.withLocation(locationData);
     }
 
-    if (search) {
-      query.where.title = { contains: search };
-    }
+    const query = queryBuilder.build();
 
-    if (category) {
-      query.where.categories = { every: { id: { in: category } } };
-    }
+    console.log(query);
 
     const [events, total] = await Promise.all([
       this.prisma.event.findMany(query),
@@ -427,7 +381,7 @@ export class EventsService {
       }
 
       default: {
-        throw 'Time range is not supported';
+        return null;
       }
     }
   }

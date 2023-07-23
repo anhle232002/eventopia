@@ -26,7 +26,7 @@ import { RolesGuard } from 'src/common/guards/role.guard';
 import { RedisCacheManager } from 'src/common/providers/redis/redis.service';
 import { RequestUser } from 'src/users/users.dto';
 import { CreateEventDto, GetEventsQuery, UpdateEventDto } from './events.dto';
-import { EventsService } from './events.service';
+import { EventsService } from './providers/event-service/events.service';
 import { imageFileValidations } from './events.validation';
 import { Prisma } from '@prisma/client';
 
@@ -107,6 +107,7 @@ export class EventsController {
     return { message: 'Delete event successfully' };
   }
 
+  @ApiBearerAuth()
   @ApiOperation({ description: 'Looking forward to event' })
   @Put('/look/:id')
   @UseGuards(AuthGuard('jwt'))
@@ -116,6 +117,7 @@ export class EventsController {
     return { message: 'Looked forward to event' };
   }
 
+  @ApiBearerAuth()
   @ApiOperation({ description: 'Unlook forward to event' })
   @Put('/unlook/:id')
   @UseGuards(AuthGuard('jwt'))

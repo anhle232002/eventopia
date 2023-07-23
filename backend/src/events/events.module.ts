@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { EventsService } from './events.service';
+import { EventsService } from './providers/event-service/events.service';
 import { EventsController } from './events.controller';
 import { BullModule } from '@nestjs/bull';
 import { CommonModule } from 'src/common/common.module';
