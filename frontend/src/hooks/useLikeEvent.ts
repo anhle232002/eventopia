@@ -7,7 +7,6 @@ export const useLikeEvent = () => {
     mutationFn: ({ eventId, like }: { eventId: number; like: boolean }) => likeEvent(eventId, like),
     onSuccess(data, variables) {
       const updatedLikedEvent = queryClient.getQueryData<Set<number>>(["events", "liked"]);
-
       if (variables.like) {
         updatedLikedEvent?.add(variables.eventId);
 

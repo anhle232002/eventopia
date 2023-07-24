@@ -1,5 +1,6 @@
 import EventCardItem from "@/components/event/EventCardItem";
 import { useEvents } from "@/hooks/useEvents";
+import { useLikedEvents } from "@/hooks/useLikedEvents";
 import { useUser } from "@/libs/auth";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -8,6 +9,7 @@ function Events() {
   const { data: user } = useUser();
   const [page, setPage] = useState(1);
   const { data, isLoading } = useEvents({ organizer: user?.organizer.id, page });
+  const { data: likedEvents } = useLikedEvents();
   return (
     <div className="px-20 py-10">
       <h1 className="text-3xl font-semibold">Your Events</h1>
@@ -20,7 +22,10 @@ function Events() {
                 {data.events.map((event) => {
                   return (
                     <Link to={`/dashboard/events/edit/${event.slug}`} key={event.id}>
-                      <EventCardItem event={event} />
+                      <EventCardItem
+                        liked={(likedEvents && likedEvents.has(event.id)) || false}
+                        event={event}
+                      />
                     </Link>
                   );
                 })}

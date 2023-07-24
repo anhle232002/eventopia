@@ -1,5 +1,8 @@
 import { buyTicket, BuyTicketDto } from "@/api/buy-ticket";
+import CountdownTimer from "@/components/common/countdown";
 import { useEvent } from "@/hooks/useEvent";
+import { useFollowOrganizer } from "@/hooks/useFollowOrganizer";
+import { useGetOrganizer } from "@/hooks/useGetOrganizer";
 import { useLikedEvents } from "@/hooks/useLikedEvents";
 import { useLikeEvent } from "@/hooks/useLikeEvent";
 import { useUser } from "@/libs/auth";
@@ -14,8 +17,13 @@ function EventDetail() {
   const { data: user } = useUser();
   const { data: event, isLoading } = useEvent(Number(id));
   const { data: likedEvents } = useLikedEvents();
-  const isLikedEvent = !!likedEvents && likedEvents.has(event.id);
+  const isLikedEvent = !!likedEvents && event && likedEvents.has(event.id);
   const likeEventMutation = useLikeEvent();
+  const followOrganizerMutation = useFollowOrganizer();
+  const { data: organizer, isLoading: isLoadingOrganizer } = useGetOrganizer(
+    event?.organizerId,
+    !!event
+  );
 
   const likeEvent = async () => {
     if (!user) {
@@ -26,6 +34,19 @@ function EventDetail() {
 
     await likeEventMutation.mutateAsync({ eventId: Number(event.id), like: !isLikedEvent });
   };
+
+  const followOrganizer = async () => {
+    if (!user) {
+      (window as any).follow_login_required_modal.showModal();
+
+      return;
+    }
+    await followOrganizerMutation.mutateAsync({
+      organizerId: organizer.id,
+      follow: !organizer.isFollowedByYou,
+    });
+  };
+  console.log(organizer);
 
   return (
     <div>
@@ -55,26 +76,30 @@ function EventDetail() {
 
               <p className="text-sm mt-4 font-semibold">{event.shortDescription}</p>
 
-              <div className="mt-8 flex px-5 py-3 bg-zinc-200">
-                <div className="flex-1 flex items-center gap-6">
-                  <div className="w-14 h-14">
-                    <img
-                      className="w-full h-full object-cover rounded-full"
-                      src={event.organizer.picture}
-                      alt=""
-                    />
-                  </div>
-
-                  <div>
-                    <div>
-                      By <strong>{event.organizer.name}</strong>
+              {!isLoadingOrganizer && organizer && (
+                <div className="mt-8 flex px-5 py-3 bg-zinc-200">
+                  <div className="flex-1 flex items-center gap-6">
+                    <div className="w-14 h-14">
+                      <img
+                        className="w-full h-full object-cover rounded-full"
+                        src={organizer.picture}
+                        alt=""
+                      />
                     </div>
-                    <div>{event.organizer._count.followers} followers</div>
-                  </div>
-                </div>
 
-                <button className="btn btn-primary btn-md capitalize">Follow</button>
-              </div>
+                    <div>
+                      <div>
+                        By <strong>{organizer.name}</strong>
+                      </div>
+                      <div>{organizer.followers} followers</div>
+                    </div>
+                  </div>
+
+                  <button onClick={followOrganizer} className="btn btn-primary btn-md capitalize">
+                    {organizer.isFollowedByYou ? "Following" : "Follow"}
+                  </button>
+                </div>
+              )}
 
               <section className="mt-8">
                 <h3 className="text-xl font-bold">When and where</h3>
@@ -173,34 +198,38 @@ function EventDetail() {
                 </div>
               </section>
 
-              <section className="mt-10">
-                <h3 className="text-xl font-bold">About the organizer</h3>
+              {!isLoadingOrganizer && organizer && (
+                <section className="mt-10">
+                  <h3 className="text-xl font-bold">About the organizer</h3>
 
-                <div className="flex flex-col justify-center items-center mt-4">
-                  <div className="w-14 h-14">
-                    <img
-                      className="w-full h-full object-cover rounded-full"
-                      src={event.organizer.picture}
-                      alt=""
-                    />
+                  <div className="flex flex-col justify-center items-center mt-4">
+                    <div className="w-14 h-14">
+                      <img
+                        className="w-full h-full object-cover rounded-full"
+                        src={organizer.picture}
+                        alt=""
+                      />
+                    </div>
+
+                    <div className="mt-4 text-sm">Organized by</div>
+
+                    <div className="mt-4 text-xl font-bold">{organizer.name}</div>
+
+                    <div className="text-center mt-6">
+                      <div className="font-bold">{organizer.followers}</div>
+                      <div className="text-sm opacity-80">Followers</div>
+                    </div>
+
+                    <div className="mt-6 space-x-10">
+                      <button className="text-info">Contact</button>
+
+                      <button onClick={followOrganizer} className="btn btn-info text-white">
+                        {organizer.isFollowedByYou ? "Following" : "Follow"}
+                      </button>
+                    </div>
                   </div>
-
-                  <div className="mt-4 text-sm">Organized by</div>
-
-                  <div className="mt-4 text-xl font-bold">{event.organizer.name}</div>
-
-                  <div className="text-center mt-6">
-                    <div className="font-bold">{event.organizer._count.followers}</div>
-                    <div className="text-sm opacity-80">Followers</div>
-                  </div>
-
-                  <div className="mt-6 space-x-10">
-                    <button className="text-info">Contact</button>
-
-                    <button className="btn btn-info text-white">Follow</button>
-                  </div>
-                </div>
-              </section>
+                </section>
+              )}
             </div>
 
             <div className="md:col-span-4 relative ">
@@ -225,12 +254,16 @@ function EventDetail() {
                 >
                   Get tickets
                 </button>
+
+                <div className="mt-2">
+                  <CountdownTimer target={event.startDate} />
+                </div>
               </div>
             </div>
           </div>
 
           <section className="mt-10">
-            <h3 className="text-xl font-bold">Other events you may like</h3>
+            {/* <h3 className="text-xl font-bold">Other events you may like</h3> */}
 
             <div className="mt-6 grid grid-cols-4">
               {/* <EventCardItem />
@@ -241,15 +274,30 @@ function EventDetail() {
           </section>
         </div>
       )}
-
-      <dialog id="payment_modal" className="modal ">
-        <PaymentForm eventId={event?.id} />
-      </dialog>
+      {event && (
+        <dialog id="payment_modal" className="modal ">
+          <PaymentForm eventId={event?.id} />
+        </dialog>
+      )}
 
       <dialog id="login_required_modal" className="modal">
         <form method="dialog" className="modal-box">
           <h3 className="font-bold text-lg">Login Required!</h3>
           <p className="py-4">You need to log in to like event. Login now.</p>
+          <div className="modal-action">
+            <button className="btn">Cancel</button>
+
+            <Link to="/login" className="btn">
+              Login
+            </Link>
+          </div>
+        </form>
+      </dialog>
+
+      <dialog id="follow_login_required_modal" className="modal">
+        <form method="dialog" className="modal-box">
+          <h3 className="font-bold text-lg">Login Required!</h3>
+          <p className="py-4">You need to log in to follow this organizer. Login now.</p>
           <div className="modal-action">
             <button className="btn">Cancel</button>
 

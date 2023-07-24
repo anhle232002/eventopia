@@ -81,19 +81,23 @@ function VerifyTicket() {
 
       {isLoading && <div>Loading...</div>}
 
-      {!isLoading && data && <TicketInfo ticket={data} />}
+      {!isLoading && data && <TicketInfo onClose={() => setResult("")} ticket={data} />}
     </div>
   );
 }
 export default VerifyTicket;
 
-function TicketInfo({ ticket }: { ticket: any }) {
+function TicketInfo({ ticket, onClose }: { ticket: any; onClose: () => void }) {
   const handleClickAllowTicket = async () => {
     const response = await processTicket(ticket.id, true);
+
+    onClose();
   };
 
   const handleClickRejectTicket = async () => {
     const response = await processTicket(ticket.id, false);
+
+    onClose();
   };
   return (
     <div>

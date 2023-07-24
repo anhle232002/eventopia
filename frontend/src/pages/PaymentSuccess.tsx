@@ -31,7 +31,7 @@ function PaymentSuccess() {
         <p className="text-lg mb-6">Your ticket purchase was successful.</p>
         <p className="text-lg mb-6">
           We send email contains your E-Ticket to your email at{" "}
-          <strong>{data.metadata.customerEmail}</strong>
+          <strong>{data?.metadata.customerEmail}</strong>
         </p>
         <p className="text-lg mb-6">
           Please check your email for the ticket details and confirmation.
