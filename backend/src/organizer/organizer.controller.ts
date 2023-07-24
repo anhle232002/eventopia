@@ -4,13 +4,11 @@ import {
   Post,
   Body,
   Param,
-  Delete,
   UseGuards,
   UseInterceptors,
   UploadedFile,
   Put,
   Query,
-  ParseIntPipe,
 } from '@nestjs/common';
 import { OrganizerService } from './organizer.service';
 import { CreateOrganizerDto } from './dto/create-organizer.dto';

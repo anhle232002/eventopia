@@ -57,6 +57,7 @@ export class PaymentController {
 
     switch (event.type) {
       case 'checkout.session.completed': {
+        Logger.log(`SESSION COMPLETED ${event.id}`);
         this.paymentService.handleOnCheckoutSessionCompleted(event);
 
         return 'Success';

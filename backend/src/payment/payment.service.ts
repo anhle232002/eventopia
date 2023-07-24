@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/common/providers/prisma.service';
 import { StripeService } from 'src/common/providers/stripe.service';
-import { EventsService } from 'src/events/events.service';
+import { EventsService } from 'src/events/providers/event-service/events.service';
 import { CheckOutTicketDto, OrderArgs } from './payment.dto';
 import { TicketService } from 'src/ticket/ticket.service';
 

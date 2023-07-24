@@ -3,7 +3,7 @@ import { Logger } from '@nestjs/common';
 import { Job, Queue } from 'bull';
 import { EmailNotification } from 'src/common/providers/notification/notification.service';
 import { UtilService } from 'src/common/providers/util.service';
-import { EventsService } from 'src/events/events.service';
+import { EventsService } from 'src/events/providers/event-service/events.service';
 import { PDFTicketContent } from 'src/ticket/generator/PDFTicket.generator';
 import { TicketService } from 'src/ticket/ticket.service';
 
