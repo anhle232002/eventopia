@@ -22,6 +22,7 @@ import { GeocodingService } from 'src/common/providers/geocoding/geocoding.servi
 import { CloudinaryService } from 'src/common/providers/cloudinary/cloudinary.service';
 import { EmailNotification } from 'src/common/providers/notification/notification.service';
 import { EventQueryBuilder } from '../event-query-builder/EventQueryBuilder';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class EventsService {
@@ -32,12 +33,16 @@ export class EventsService {
     private readonly cloudiaryService: CloudinaryService,
     private readonly schedulerRegistry: SchedulerRegistry,
     private readonly utilService: UtilService,
+    private readonly usersSerivce: UsersService,
     @Inject('GeocodingService') private readonly geocodingService: GeocodingService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: RedisCache,
     @InjectQueue('notification') private readonly queue: Queue,
   ) {}
 
-  async getEvents({ page, date, online, organizer, lat, long, search, category }: GetEventsQuery) {
+  async getEvents(
+    { page, date, online, organizer, lat, long, search, category, fo }: GetEventsQuery,
+    user?: RequestUser,
+  ) {
     const queryBuilder = new EventQueryBuilder();
 
     queryBuilder
@@ -54,9 +59,16 @@ export class EventsService {
       queryBuilder.withLocation(locationData);
     }
 
-    const query = queryBuilder.build();
+    if (fo) {
+      if (!user) throw new BadRequestException('Cannot get followed organizers with unauthenticated user');
 
-    console.log(query);
+      const followedOrganizers = await this.usersSerivce.getFollowedOrganizers(user.id);
+      const followedOrganizersIds = followedOrganizers.map((o) => o.organizerId);
+
+      queryBuilder.withFollowedOrganizers(followedOrganizersIds);
+    }
+
+    const query = queryBuilder.build();
 
     const [events, total] = await Promise.all([
       this.prisma.event.findMany(query),

@@ -99,8 +99,24 @@ export class EventQueryBuilder {
 
   withCategory(categories: number[]) {
     if (!categories) return this;
+    console.log(categories);
 
     this.query.where.categories = { every: { id: { in: categories } } };
+
+    return this;
+  }
+
+  /**
+   * Must not come with withOrganizer query
+   * @param followedOrganizers
+   * @returns builder
+   */
+  withFollowedOrganizers(followedOrganizers: string[]) {
+    if (!followedOrganizers) return this;
+
+    this.query.where.organizerId = {
+      in: followedOrganizers,
+    };
 
     return this;
   }

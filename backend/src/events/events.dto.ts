@@ -4,6 +4,7 @@ import { Event, Prisma, User } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import {
   ArrayMinSize,
+  Equals,
   isArray,
   IsArray,
   IsBoolean,
@@ -19,6 +20,8 @@ import {
   IsObject,
   IsOptional,
   IsString,
+  Max,
+  Min,
   ValidateIf,
 } from 'class-validator';
 import { TransformDate, Trim } from 'src/common/decorators/validation.decorator';
@@ -84,9 +87,15 @@ export class GetEventsQuery {
   })
   @Transform((p) => {
     if (isArray(p.value)) return p.value.map(Number);
-    if (isNumberString(p.value)) return [Number(p.value)];
+    if (isNumberString(p.value.trim())) return [Number(p.value)];
   })
   category?: number[];
+
+  @ApiProperty({ required: false, description: 'get events by followed organizers' })
+  @IsOptional()
+  @Equals(1)
+  @Transform((p) => Number(p.value))
+  fo: number;
 }
 
 export class CreateEventDto {

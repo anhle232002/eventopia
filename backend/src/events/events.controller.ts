@@ -31,6 +31,7 @@ import { imageFileValidations } from './events.validation';
 import { Prisma } from '@prisma/client';
 import { CustomCacheInterceptor } from 'src/common/interceptors/custom-cache.interceptor';
 import { ExcludeCache } from 'src/common/decorators/exclude-cache-path';
+import { OptionalJWT } from 'src/common/guards/optional-jwt.guard';
 
 const HOUR = 60 * 60 * 1000;
 
@@ -43,8 +44,9 @@ export class EventsController {
   @ExcludeCache(['fo']) // ignore cache on followed organizers query
   @UseInterceptors(CustomCacheInterceptor)
   @CacheTTL(6 * HOUR)
-  async getEvents(@Req() req: Request, @Query() query: GetEventsQuery) {
-    const { events, total } = await this.eventService.getEvents(query);
+  @UseGuards(OptionalJWT)
+  async getEvents(@Req() req: Request, @Query() query: GetEventsQuery, @ReqUser() user?: RequestUser) {
+    const { events, total } = await this.eventService.getEvents(query, user);
 
     return { results: events, page: query.page, count: events.length, total: total };
   }
