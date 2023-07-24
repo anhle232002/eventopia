@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/common/providers/prisma.service';
 import { CreateAccountInput, CreateUserDTO, RequestUser } from './users.dto';
 import bcrypt from 'bcrypt';
@@ -94,5 +94,24 @@ export class UsersService {
     });
 
     return likedEvents;
+  }
+
+  async getFollowedOrganizers(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        follows: {
+          select: { organizerId: true },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User does not exist');
+    }
+
+    return user.follows;
   }
 }
