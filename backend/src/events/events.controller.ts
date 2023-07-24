@@ -29,6 +29,8 @@ import { CreateEventDto, GetEventsQuery, UpdateEventDto } from './events.dto';
 import { EventsService } from './providers/event-service/events.service';
 import { imageFileValidations } from './events.validation';
 import { Prisma } from '@prisma/client';
+import { CustomCacheInterceptor } from 'src/common/interceptors/custom-cache.interceptor';
+import { ExcludeCache } from 'src/common/decorators/exclude-cache-path';
 
 const HOUR = 60 * 60 * 1000;
 
@@ -38,7 +40,8 @@ export class EventsController {
   constructor(private readonly eventService: EventsService, private readonly redisCache: RedisCacheManager) {}
 
   @Get()
-  @UseInterceptors(CacheInterceptor)
+  @ExcludeCache(['fo']) // ignore cache on followed organizers query
+  @UseInterceptors(CustomCacheInterceptor)
   @CacheTTL(6 * HOUR)
   async getEvents(@Req() req: Request, @Query() query: GetEventsQuery) {
     const { events, total } = await this.eventService.getEvents(query);
