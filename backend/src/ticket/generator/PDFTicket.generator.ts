@@ -24,12 +24,13 @@ export class PDFTicketGenerator implements TicketGenerator {
   private async compile(template: string, data: Record<string, any>) {
     try {
       const filePath = path.join(process.cwd(), 'src', 'templates', template);
-
       const html = await readFile(filePath);
 
       return hbs.compile(html.toString())(data);
     } catch (error) {
       Logger.error(error);
+
+      throw error;
     }
   }
 
@@ -51,13 +52,15 @@ export class PDFTicketGenerator implements TicketGenerator {
       }
 
       const fileName = path.resolve('files', `${Date.now()}.pdf`);
-      await page.pdf({ path: fileName, format: 'a5', printBackground: true });
 
+      await page.pdf({ path: fileName, format: 'a5', printBackground: true });
       await browser.close();
-      Logger.log('print pdf succes');
+
       return fileName;
     } catch (error) {
       Logger.error(error);
+
+      throw error;
     }
   }
 }

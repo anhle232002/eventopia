@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { PDFTicketGenerator } from './PDFTicket.generator';
 import { QRTicketGenerator } from './QRTicket.generator';
 import { TicketGenerator } from './ticket.generator';
-
 export type TICKET_TYPE = 'QR' | 'PDF';
 
 @Injectable()
