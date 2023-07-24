@@ -47,10 +47,43 @@ export class UtilService {
 
     return { start: startOfDay(now), end: endOfWeek(now) };
   }
+
   getThisMonthRange() {
     const now = new Date();
 
     return { start: startOfDay(now), end: endOfMonth(now) };
+  }
+
+  getDateRange(type: string) {
+    switch (type) {
+      case 'today': {
+        const { start, end } = this.getTodayRange();
+        return {
+          start,
+          end,
+        };
+      }
+
+      case 'this_week': {
+        const { start, end } = this.getThisWeekRange();
+        return {
+          start,
+          end,
+        };
+      }
+
+      case 'this_month': {
+        const { start, end } = this.getThisMonthRange();
+        return {
+          start,
+          end,
+        };
+      }
+
+      default: {
+        return null;
+      }
+    }
   }
 
   @Cron(CronExpression.EVERY_30_MINUTES)
@@ -64,6 +97,8 @@ export class UtilService {
       Logger.log('Clear folder files succesfully', 'Util');
     } catch (error) {
       Logger.error(error, 'Util: Cannot clear folder files');
+
+      throw new Error(error.message);
     }
   }
 }

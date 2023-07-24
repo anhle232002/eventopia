@@ -28,6 +28,18 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
 
       return result;
     });
+
+    // After update trigger
+    /**
+     * CREATE TRIGGER before_update_event
+      BEFORE UPDATE ON Event
+      FOR EACH ROW
+      BEGIN
+        DECLARE modified_title VARCHAR(255);
+        SET modified_title = REPLACE(LOWER(NEW.title), ' ', '-');
+        SET NEW.slug = CONCAT(modified_title, '-', NEW.id);
+      END;
+     */
   }
 
   async enableShutdownHooks(app: INestApplication) {

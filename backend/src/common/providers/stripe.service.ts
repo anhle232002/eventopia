@@ -13,7 +13,8 @@ export class StripeService {
         apiVersion: '2022-11-15',
       });
     } catch (error) {
-      Logger.error('Error connect to stripe', 'Stripe');
+      Logger.error(`Error connect to stripe`, 'Stripe');
+      throw new Error('STRIPE: Error connect to Stripe');
     }
   }
 
@@ -34,8 +35,6 @@ export class StripeService {
   }
 
   constructEvent(payload, signature: string) {
-    Logger.log('CONSTRUCTING EVENT');
-
     return this.stripe.webhooks.constructEvent(
       payload,
       signature,
