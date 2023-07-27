@@ -23,6 +23,8 @@ import { CloudinaryService } from 'src/common/providers/cloudinary/cloudinary.se
 import { EmailNotification } from 'src/common/providers/notification/notification.service';
 import { EventQueryBuilder } from '../event-query-builder/EventQueryBuilder';
 import { UsersService } from 'src/users/users.service';
+import { EventNotifcationService } from 'src/common/providers/notification/event-notification/event-notification.service';
+import { add } from 'date-fns';
 
 @Injectable()
 export class EventsService {
@@ -34,6 +36,7 @@ export class EventsService {
     private readonly schedulerRegistry: SchedulerRegistry,
     private readonly utilService: UtilService,
     private readonly usersSerivce: UsersService,
+    private readonly eventNotificationService: EventNotifcationService,
     @Inject('GeocodingService') private readonly geocodingService: GeocodingService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: RedisCache,
     @InjectQueue('notification') private readonly queue: Queue,
@@ -118,7 +121,13 @@ export class EventsService {
       data: { ...createEventDto, images: createEventDto.images as any[] as Prisma.JsonArray },
     });
 
-    this.scheduleNotificationEmail(event);
+    // TODO: remove old schedule function
+    // this.scheduleNotificationEmail(event);
+    this.eventNotificationService.schedule(
+      `event:notification:${event.id}`,
+      () => this.eventNotificationService.sendEventReminderNotification(event),
+      add(new Date(), { days: -1 }),
+    );
 
     return event;
   }
@@ -208,7 +217,13 @@ export class EventsService {
 
     // Start date has been changed, need to reschedule the notification email
     if (updateEventDto.startDate && updateEventDto.startDate !== updatedEvent.startDate) {
-      this.scheduleNotificationEmail(updatedEvent);
+      // TODO: remove
+      // this.scheduleNotificationEmail(updatedEvent);
+      this.eventNotificationService.schedule(
+        `event:notification:${updatedEvent.id}`,
+        () => this.eventNotificationService.sendEventReminderNotification(updatedEvent),
+        add(new Date(), { days: -1 }),
+      );
     }
 
     return updatedEvent;

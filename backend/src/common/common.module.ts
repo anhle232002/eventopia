@@ -5,6 +5,7 @@ import { OptionalJWT } from './guards/optional-jwt.guard';
 import { CloudinaryService } from './providers/cloudinary/cloudinary.service';
 import { CommonService } from './providers/common.service';
 import { GeocodingServiceImpl } from './providers/geocoding/geocoding.service';
+import { EventNotifcationService } from './providers/notification/event-notification/event-notification.service';
 import { NotificationProcessor } from './providers/notification/notification.processor';
 import { NotificationServiceImpl } from './providers/notification/notification.service';
 import { PrismaService } from './providers/prisma.service';
@@ -20,6 +21,7 @@ const services: Provider[] = [
   StripeService,
   UtilService,
   RedisCacheManager,
+  EventNotifcationService,
   {
     provide: 'NotificationService',
     useClass: NotificationServiceImpl,
