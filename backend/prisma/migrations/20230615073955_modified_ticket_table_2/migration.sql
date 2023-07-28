@@ -1,0 +1,7 @@
+-- AlterTable
+ALTER TABLE `Ticket` ADD COLUMN `customer_cid` VARCHAR(191) NOT NULL DEFAULT '',
+    ADD COLUMN `customer_name` VARCHAR(191) NOT NULL DEFAULT '',
+    ADD COLUMN `status` VARCHAR(191) NOT NULL DEFAULT 'active',
+    ADD COLUMN `ticketCode` VARCHAR(191) NULL DEFAULT '',
+    MODIFY `type` VARCHAR(191) NOT NULL DEFAULT 'standard',
+    MODIFY `customer_email` VARCHAR(191) NOT NULL DEFAULT '';
