@@ -51,7 +51,12 @@ export class UsersService {
         familyName: true,
         picture: true,
         role: true,
-        accounts: true,
+        accounts: {
+          select: {
+            id: true,
+            providerType: true,
+          },
+        },
         password: exposePassword,
         organizer: { select: { id: true } },
       },

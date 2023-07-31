@@ -144,7 +144,7 @@ export class TicketService {
       },
     });
 
-    // off load save pdf to queue
+    // off load save pdf to queue (deprecated)
     // await this.ticketsQueue.add('save-pdf-ticket', ticket);
 
     return ticket;
