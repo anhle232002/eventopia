@@ -15,6 +15,7 @@ import { CommonModule } from './common/common.module';
 import { OrganizerModule } from './organizer/organizer.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { PromoModule } from './promo/promo.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -79,6 +80,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
     UsersModule,
     CommonModule,
     OrganizerModule,
+    PromoModule,
   ],
   providers: [],
 })

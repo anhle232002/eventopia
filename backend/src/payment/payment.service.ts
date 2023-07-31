@@ -2,12 +2,15 @@ import { Stripe } from 'stripe';
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 import { ConfigService } from '@nestjs/config';
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, HttpException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/common/providers/prisma.service';
 import { StripeService } from 'src/common/providers/stripe.service';
 import { EventsService } from 'src/events/providers/event-service/events.service';
 import { CheckOutTicketDto, OrderArgs } from './payment.dto';
 import { TicketService } from 'src/ticket/ticket.service';
+import { PromoService } from 'src/promo/services/promo.service';
+import { Promo } from '@prisma/client';
+import { PROMOTION_TYPE } from 'src/common/constants';
 
 @Injectable()
 export class PaymentService {
@@ -17,6 +20,7 @@ export class PaymentService {
     private readonly eventService: EventsService,
     private readonly ticketService: TicketService,
     private readonly prisma: PrismaService,
+    private readonly promotionService: PromoService,
     @InjectQueue('payment') private readonly paymentQueue: Queue,
   ) {}
 
@@ -28,7 +32,7 @@ export class PaymentService {
     }
 
     // Create transaction
-    const updatedEvent = await this.prisma.$transaction(async (tx) => {
+    const { event, promoCode } = await this.prisma.$transaction(async (tx) => {
       const event = await tx.event.update({
         where: { id: checkOutTicketDto.eventId },
         data: { sold: { increment: checkOutTicketDto.quantity } },
@@ -39,8 +43,60 @@ export class PaymentService {
         throw new HttpException('Tickets have been sold out', 400);
       }
 
-      return event;
+      // ticket with promo code
+      let promoCode: Promo | null = null;
+
+      if (checkOutTicketDto.promoCode) {
+        const updatedPromo = await tx.promo.update({
+          where: {
+            code: checkOutTicketDto.promoCode,
+          },
+          data: {
+            used: { increment: 1 },
+          },
+          include: {
+            promoOnEvent: {
+              select: { eventId: true },
+            },
+            promoOnOrganizer: {
+              select: { organizerId: true },
+            },
+          },
+        });
+
+        if (!updatedPromo) {
+          throw new NotFoundException('Promotion Code does not exist');
+        }
+
+        if (!this.promotionService.isValidPromoCode(updatedPromo)) {
+          throw new BadRequestException('The promotion code is invalid');
+        }
+
+        if (updatedPromo.used > updatedPromo.total) {
+          throw new BadRequestException('The promotion code has reached its maximum usage limit.');
+        }
+
+        if (
+          !this.promotionService.isApplicableEvent(updatedPromo, event.id) &&
+          !this.promotionService.isApplicableOrganizer(updatedPromo, event.organizerId)
+        ) {
+          throw new BadRequestException('Cannot apply promotion code on this event');
+        }
+
+        promoCode = updatedPromo;
+      }
+
+      return { event, promoCode };
     });
+
+    let price = event.ticketPrice * 100;
+
+    if (promoCode && promoCode.type === PROMOTION_TYPE.fix) {
+      price = price - promoCode.discount;
+    }
+    if (promoCode && promoCode.type === PROMOTION_TYPE.percentage) {
+      price = price - (price * promoCode.discount) / 100;
+    }
 
     return this.stripeService.createSession({
       customerEmail: checkOutTicketDto.customerEmail,
@@ -49,9 +105,9 @@ export class PaymentService {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: updatedEvent.title,
+              name: event.title,
             },
-            unit_amount: updatedEvent.ticketPrice * 100,
+            unit_amount: price,
           },
           quantity: checkOutTicketDto.quantity,
         },
@@ -63,17 +119,16 @@ export class PaymentService {
         customerName: checkOutTicketDto.customerName,
         customerCID: checkOutTicketDto.customerCID,
         userId: checkOutTicketDto.userId,
-        price: updatedEvent.ticketPrice,
+        price: event.ticketPrice,
+        promoId: promoCode.id || null,
         type: 'standard',
       },
       currency: 'usd',
       mode: 'payment',
       cancelUrl:
         process.env.NODE_ENV === 'production'
-          ? `${this.configService.get('HOST_NAME')}/api/payment/cancel/${checkOutTicketDto.eventId}?q=${
-              checkOutTicketDto.quantity
-            }`
-          : `http://localhost:3000/api/payment/cancel/${checkOutTicketDto.eventId}?q=${checkOutTicketDto.quantity}`,
+          ? `${this.configService.get('HOST_NAME')}/api/payment/cancel?session_id={CHECKOUT_SESSION_ID}`
+          : `http://localhost:3000/api/payment/cancel?session_id={CHECKOUT_SESSION_ID}`,
       sucessUrl: `${this.configService.get('CLIENT_URL')}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
     });
   }
@@ -96,6 +151,7 @@ export class PaymentService {
         eventId: Number(metadata.eventId),
         price: Number(metadata.price),
         quantity: Number(metadata.quantity),
+        promoId: Number(metadata.promoId) || null,
         customerEmail: metadata.customerEmail,
         customerName: metadata.customerName,
         customerCID: metadata.customerCID,
@@ -120,6 +176,7 @@ export class PaymentService {
       customerEmail: order.customerEmail,
       customerName: order.customerName,
       customerCID: order.customerCID,
+      promoId: order.promoId,
     });
 
     // considering using transaction
@@ -145,12 +202,21 @@ export class PaymentService {
   async handleOnPaymentFailed(event: Stripe.Event) {
     const { metadata } = await this.stripeService.retrieveSessionWithItems((event.data.object as any).id);
 
-    return this.eventService.releaseReservedTickets(Number(metadata.eventId), Number(metadata.quantity));
+    await Promise.all([
+      this.eventService.releaseReservedTickets(Number(metadata.eventId), Number(metadata.quantity)),
+      this.promotionService.releasePromotionCode(Number(metadata.promoId), Number(metadata.quantity)),
+    ]);
   }
 
-  handleOnCheckOutSessionCanceled(eventId: number, quantity: number) {
-    return this.eventService.releaseReservedTickets(eventId, quantity);
+  async handleOnCheckOutSessionCanceled(sessionId: string) {
+    const { metadata } = await this.stripeService.retrieveSessionWithItems(sessionId);
+
+    return await Promise.all([
+      this.eventService.releaseReservedTickets(Number(metadata.eventId), Number(metadata.quantity)),
+      this.promotionService.releasePromotionCode(Number(metadata.promoId), Number(metadata.quantity)),
+    ]);
   }
+
   async getPaymentSession(sessionId: string) {
     const session = await this.stripeService.retrieveSessionWithItems(sessionId);
 

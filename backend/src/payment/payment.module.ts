@@ -8,6 +8,7 @@ import { CommonModule } from 'src/common/common.module';
 import { TicketModule } from 'src/ticket/ticket.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { UsersModule } from 'src/users/users.module';
+import { PromoModule } from 'src/promo/promo.module';
 
 @Module({
   controllers: [PaymentController],
@@ -16,6 +17,7 @@ import { UsersModule } from 'src/users/users.module';
     TicketModule,
     EventsModule,
     CommonModule,
+    PromoModule,
     AuthModule,
     UsersModule,
     BullModule.registerQueue({ name: 'payment' }, { name: 'notification' }),

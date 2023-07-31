@@ -3,14 +3,12 @@ import {
   Controller,
   Get,
   Headers,
-  Inject,
   Logger,
   Param,
   ParseIntPipe,
   Post,
   Query,
   RawBodyRequest,
-  Redirect,
   Req,
   Res,
   UseGuards,
@@ -81,13 +79,12 @@ export class PaymentController {
   }
 
   @ApiExcludeEndpoint(true)
-  @Get('/cancel/:eid')
+  @Get('/cancel')
   async cancelCheckoutSession(
-    @Param('eid', ParseIntPipe) eventId: number,
-    @Query('q', ParseIntPipe) quantity: number,
+    @Query('session_id') sessionId: string,
     @Res({ passthrough: true }) res: Response,
   ) {
-    await this.paymentService.handleOnCheckOutSessionCanceled(eventId, quantity);
+    await this.paymentService.handleOnCheckOutSessionCanceled(sessionId);
 
     res.redirect(this.configService.get('CLIENT_URL'));
   }

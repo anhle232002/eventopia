@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsNumber, IsString, Min } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export class CheckOutTicketDto {
   eventId: number;
@@ -8,6 +8,7 @@ export class CheckOutTicketDto {
   customerName: string;
   customerCID: string;
   userId?: string;
+  promoCode?: string;
 }
 
 export class BuyTicketDto {
@@ -30,6 +31,11 @@ export class BuyTicketDto {
   @IsNumber()
   @Min(1)
   quantity: number;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  promoCode?: string;
 }
 
 export class OrderArgs {
@@ -41,4 +47,5 @@ export class OrderArgs {
   eventId: number;
   price: number;
   quantity: number;
+  promoId: number | null;
 }
