@@ -33,6 +33,7 @@ export class OrganizerController {
     private readonly usersService: UsersService,
   ) {}
 
+  @ApiBearerAuth()
   @Post()
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @UseInterceptors(FileInterceptor('picture'))
