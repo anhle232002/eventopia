@@ -36,17 +36,19 @@ model Follower {
 }
 
 model Organizer {
-  id          String     @id @default(uuid())
-  user        User       @relation(fields: [userId], references: [id])
-  userId      String     @unique
-  email       String?
-  name        String?
-  social      Json?
-  phoneNumber String?    @map("phone_number")
-  picture     String?
-  description String?
-  events      Event[]
-  followers   Follower[]
+  id               String             @id @default(uuid())
+  user             User               @relation(fields: [userId], references: [id])
+  userId           String             @unique
+  email            String?
+  name             String?
+  social           Json?
+  phoneNumber      String?            @map("phone_number")
+  picture          String?
+  description      String?
+  events           Event[]
+  followers        Follower[]
+  promos           Promo[]
+  promoOnOrganizer promoOnOrganizer[]
 }
 
 model Account {
@@ -111,6 +113,7 @@ model Event {
   looks            UserLookEvent[]
   tags             Tag[]
   categories       Category[]
+  promos           promoOnEvent[]
 }
 
 model TicketType {
@@ -131,12 +134,14 @@ model Ticket {
   type          String   @default("standard")
   status        String   @default("active")
   ticketCode    String?  @default("")
-  price         Float
   pdfUrl        String?  @map("pdf_url")
+  price         Float
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
+  promoId       Int?
   user          User?    @relation(fields: [userId], references: [id])
   event         Event    @relation(fields: [eventId], references: [id])
+  Promo         Promo?   @relation(fields: [promoId], references: [id])
 }
 
 model Review {
@@ -161,4 +166,41 @@ model Category {
   id     Int     @id @default(autoincrement())
   name   String  @unique
   events Event[]
+}
+
+model Promo {
+  id               Int                @id @default(autoincrement())
+  code             String             @unique
+  type             String
+  total            Int
+  used             Int                @default(0)
+  discount         Float
+  validFrom        DateTime           @map("valid_from")
+  validUntil       DateTime           @map("valid_until")
+  createdAt        DateTime           @default(now()) @map("created_at")
+  updatedAt        DateTime           @updatedAt @map("updated_at")
+  organizerId      String
+  organizer        Organizer          @relation(fields: [organizerId], references: [id])
+  Ticket           Ticket[]
+  promoOnEvent     promoOnEvent[]
+  promoOnOrganizer promoOnOrganizer[]
+}
+
+model promoOnEvent {
+  promoId Int
+  eventId Int
+  promo   Promo @relation(fields: [promoId], references: [id])
+  event   Event @relation(fields: [eventId], references: [id])
+
+  @@id([promoId, eventId])
+}
+
+model promoOnOrganizer {
+  promoId     Int
+  organizerId String
+
+  promo     Promo     @relation(fields: [promoId], references: [id])
+  organizer Organizer @relation(fields: [organizerId], references: [id])
+
+  @@id([promoId, organizerId])
 }
