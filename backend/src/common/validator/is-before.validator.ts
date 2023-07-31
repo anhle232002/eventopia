@@ -3,6 +3,10 @@ import { ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface 
 @ValidatorConstraint({ name: 'isDateBefore', async: false })
 export class IsDateBefore implements ValidatorConstraintInterface {
   validate(propertyValue: string, args: ValidationArguments) {
+    if (!args.object[args.constraints[0]]) {
+      return true;
+    }
+
     return propertyValue > args.object[args.constraints[0]];
   }
 
