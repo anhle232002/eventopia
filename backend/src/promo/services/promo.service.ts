@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { Prisma, Promo } from '@prisma/client';
 import { isAfter, isBefore } from 'date-fns';
+import { PROMOTION_STATUS } from 'src/common/constants';
 import { PrismaService } from 'src/common/providers/prisma.service';
 import { UtilService } from 'src/common/providers/util.service';
 import { RequestUser } from 'src/users/users.dto';
@@ -173,6 +174,7 @@ export class PromoService {
         type: updatePromoDto.type,
         validFrom: updatePromoDto.validFrom,
         validUntil: updatePromoDto.validUntil,
+        status: updatePromoDto.status,
       },
       include: {
         promoOnEvent: {
@@ -218,8 +220,8 @@ export class PromoService {
       }
     }
 
+    // Include events
     if (updatePromoDto.events) {
-      // Include events
       const applicableEventsIdsSet = new Set(updatedPromoCode.promoOnEvent.map((e) => e.eventId));
       const newApplycableEvents = updatePromoDto.events.filter((e) => {
         return !applicableEventsIdsSet.has(e);
@@ -251,6 +253,10 @@ export class PromoService {
         },
       });
     }
+  }
+
+  isActivePromoCode(promoCode: Promo) {
+    return promoCode.status === PROMOTION_STATUS.ACTIVE;
   }
 
   isValidPromoCode(promoCode: Promo) {

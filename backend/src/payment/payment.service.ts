@@ -80,7 +80,11 @@ export class PaymentService {
           !this.promotionService.isApplicableEvent(updatedPromo, event.id) &&
           !this.promotionService.isApplicableOrganizer(updatedPromo, event.organizerId)
         ) {
-          throw new BadRequestException('Cannot apply promotion code on this event');
+          throw new BadRequestException('Cannot apply this promotion code on this event');
+        }
+
+        if (!this.promotionService.isActivePromoCode(updatedPromo)) {
+          throw new BadRequestException('The promotion code is currently not active');
         }
 
         promoCode = updatedPromo;

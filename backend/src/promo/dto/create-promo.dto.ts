@@ -3,7 +3,6 @@ import { Transform } from 'class-transformer';
 import {
   IsBoolean,
   IsDate,
-  IsEnum,
   IsIn,
   IsInt,
   IsNumber,

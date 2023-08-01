@@ -179,6 +179,7 @@ model Promo {
   validUntil       DateTime           @map("valid_until")
   createdAt        DateTime           @default(now()) @map("created_at")
   updatedAt        DateTime           @updatedAt @map("updated_at")
+  status           String             @default("active")
   organizerId      String
   organizer        Organizer          @relation(fields: [organizerId], references: [id])
   Ticket           Ticket[]

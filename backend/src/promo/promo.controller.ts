@@ -1,4 +1,15 @@
-import { Controller, Post, Body, UseGuards, Put, Get, Query, Param, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Put,
+  Get,
+  Query,
+  Param,
+  ParseIntPipe,
+  Delete,
+} from '@nestjs/common';
 import { PromoService } from './services/promo.service';
 import { CreatePromoDto } from './dto/create-promo.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -20,8 +31,12 @@ export class PromoController {
   @Post()
   @Roles(Role.Organizer)
   @UseGuards(AuthGuard('jwt'), RolesGuard)
-  create(@Body() createPromoDto: CreatePromoDto, @ReqUser() user: RequestUser) {
-    return this.promoService.create(createPromoDto, user);
+  async create(@Body() createPromoDto: CreatePromoDto, @ReqUser() user: RequestUser) {
+    await this.promoService.create(createPromoDto, user);
+
+    return {
+      message: 'Create promotion code successfully',
+    };
   }
 
   @ApiBearerAuth()
@@ -58,5 +73,14 @@ export class PromoController {
     return {
       message: 'Update promotion code successfully',
     };
+  }
+
+  // soft delete
+  @ApiBearerAuth()
+  @Delete(':id')
+  @Roles(Role.Organizer)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  async deletePromoCode() {
+    return 'Currently not supported';
   }
 }
