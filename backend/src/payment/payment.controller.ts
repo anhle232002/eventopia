@@ -20,7 +20,7 @@ import { ReqUser } from 'src/common/decorators/req-user.decorator';
 import { OptionalJWT } from 'src/common/guards/optional-jwt.guard';
 import { RequestUser } from 'src/users/users.dto';
 import { BuyTicketDto } from './payment.dto';
-import { PaymentService } from './payment.service';
+import { PaymentService } from './providers/payment-service/payment.service';
 
 @ApiTags('Payment')
 @Controller('/api/payment')

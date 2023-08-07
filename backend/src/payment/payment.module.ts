@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { PaymentService } from './payment.service';
 import { PaymentController } from './payment.controller';
 import { EventsModule } from 'src/events/events.module';
 import { BullModule } from '@nestjs/bull';
@@ -9,6 +8,7 @@ import { TicketModule } from 'src/ticket/ticket.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { UsersModule } from 'src/users/users.module';
 import { PromoModule } from 'src/promo/promo.module';
+import { PaymentService } from './providers/payment-service/payment.service';
 
 @Module({
   controllers: [PaymentController],

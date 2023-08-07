@@ -16,7 +16,7 @@ function Navbar() {
     } else if (user.role !== "organizer") {
       (window as any).create_profile_modal.showModal();
     } else {
-      navigate("/dashboard", { replace: true });
+      window.open("/organizer/dashboard");
     }
   };
   return (
@@ -64,7 +64,7 @@ function Navbar() {
                 className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
               >
                 <li>
-                  <a href="/dashboard" className="py-3">
+                  <a href="/organizer/dashboard" className="py-3">
                     <i className="ri-profile-fill text-xl"></i>
                     <span className="ml-2">Create Event</span>
                   </a>
