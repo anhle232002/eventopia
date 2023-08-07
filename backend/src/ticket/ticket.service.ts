@@ -47,7 +47,7 @@ export class TicketService {
     }
 
     // if user are not the owner and are not the admin also
-    if (ticket.userId !== user.id && ticket.event.organizerId !== user.id) {
+    if (ticket.userId !== user.id && ticket.event.organizerId !== user.organizer.id) {
       throw new HttpException('FORBIDDEN', 403);
     }
 

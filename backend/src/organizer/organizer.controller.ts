@@ -9,6 +9,7 @@ import {
   UploadedFile,
   Put,
   Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { OrganizerService } from './organizer.service';
 import { CreateOrganizerDto } from './dto/create-organizer.dto';
@@ -52,6 +53,26 @@ export class OrganizerController {
   @Get()
   findAll() {
     return this.organizerService.findAll();
+  }
+
+  @ApiBearerAuth()
+  @Get('events')
+  @Roles(Role.Organizer)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  async getEvents(@Query('page', ParseIntPipe) page: number, @ReqUser() user: RequestUser) {
+    const { events, total } = await this.organizerService.getEvents(page, user);
+
+    return { results: events, page: page, count: events.length, total: total };
+  }
+
+  @ApiBearerAuth()
+  @Get('tickets')
+  @Roles(Role.Organizer)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  async getTickets(@Query('page', ParseIntPipe) page: number, @ReqUser() user: RequestUser) {
+    const { tickets, total } = await this.organizerService.getTickets(page, user);
+
+    return { results: tickets, page: page, count: tickets.length, total: total };
   }
 
   @Get(':id')

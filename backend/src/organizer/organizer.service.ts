@@ -5,7 +5,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { Organizer } from '@prisma/client';
+import { Organizer, Prisma } from '@prisma/client';
 import { Role } from 'src/common/constants';
 import { CloudinaryService } from 'src/common/providers/cloudinary/cloudinary.service';
 import { PrismaService } from 'src/common/providers/prisma.service';
@@ -16,6 +16,8 @@ import { UpdateOrganizerDto } from './dto/update-organizer.dto';
 @Injectable()
 export class OrganizerService {
   constructor(private readonly cloudinary: CloudinaryService, private readonly prisma: PrismaService) {}
+  private EVENTS_PAGE_SIZE = 15;
+  private TICKETS_PAGE_SIZE = 15;
 
   async create(createOrganizerDto: CreateOrganizerDto, picture?: Express.Multer.File) {
     const user = await this.prisma.user.findUnique({
@@ -168,5 +170,58 @@ export class OrganizerService {
     }
 
     return organizer.followers;
+  }
+
+  async getEvents(page: number, user: RequestUser) {
+    const query = {
+      take: this.EVENTS_PAGE_SIZE,
+      skip: this.EVENTS_PAGE_SIZE * (page - 1),
+      where: {
+        organizerId: user.organizer.id,
+      },
+      include: {
+        _count: {
+          select: {
+            looks: true,
+          },
+        },
+      },
+    };
+
+    const [events, total] = await Promise.all([
+      this.prisma.event.findMany(query),
+      this.prisma.event.count({ where: query.where }),
+    ]);
+
+    return { events, total };
+  }
+
+  async getTickets(page: number, user: RequestUser) {
+    const organizer = await this.prisma.organizer.findUnique({ where: { id: user.organizer.id } });
+
+    if (!organizer) {
+      throw new NotFoundException('Organizer is not found');
+    }
+
+    if (organizer.id !== user.organizer.id) {
+      throw new ForbiddenException('User is not the owner of the organizer');
+    }
+
+    const query: Prisma.TicketFindManyArgs = {
+      take: this.TICKETS_PAGE_SIZE,
+      skip: this.TICKETS_PAGE_SIZE * (page - 1),
+      where: {
+        event: { organizerId: organizer.id },
+      },
+      include: { event: { select: { title: true, startDate: true, isCancelled: true } } },
+      orderBy: { updatedAt: 'desc' },
+    };
+
+    const [tickets, total] = await Promise.all([
+      this.prisma.ticket.findMany(query),
+      this.prisma.ticket.count({ where: query.where }),
+    ]);
+
+    return { tickets, total };
   }
 }
