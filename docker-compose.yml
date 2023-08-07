@@ -34,7 +34,7 @@ services:
       - ./backend/.env
     environment:
       - DATABASE_URL=mysql://root:123123@database:3306/EVENTS_AROUND
-      - CLIENT_URL=http://localhost:5173
+      - CLIENT_URL=http://localhost:5000
       - REDIS_PORT=6379
       - REDIS_URL=redis://redis:6379
       - REDIS_PASSWORD=abc
@@ -48,11 +48,11 @@ services:
       - backend
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
     environment:
       - VITE_API_URL=http://localhost:3000/api
     ports:
-      - 5173:5173
+      - 5000:5000
 
 volumes:
   db:

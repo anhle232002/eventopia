@@ -39,33 +39,33 @@ const router = createBrowserRouter([
   },
   { path: "/login", Component: Login },
   { path: "/signup", Component: SignUp },
-  {
-    path: "/dashboard",
-    Component: DashBoard,
-    children: [
-      {
-        path: "/dashboard/create-event",
-        Component: CreateEvent,
-      },
-      {
-        path: "/dashboard/events",
-        Component: Events,
-      },
-      {
-        path: "/dashboard/events/edit/:event",
-        loader: (args) => {
-          const id = args.params.event?.split("-").at(-1);
+  // {
+  //   path: "/dashboard",
+  //   Component: DashBoard,
+  //   children: [
+  //     {
+  //       path: "/dashboard/create-event",
+  //       Component: CreateEvent,
+  //     },
+  //     {
+  //       path: "/dashboard/events",
+  //       Component: Events,
+  //     },
+  //     {
+  //       path: "/dashboard/events/edit/:event",
+  //       loader: (args) => {
+  //         const id = args.params.event?.split("-").at(-1);
 
-          return id || null;
-        },
-        Component: EditEvent,
-      },
-      {
-        path: "/dashboard/tickets/verify",
-        Component: VerifyTicket,
-      },
-    ],
-  },
+  //         return id || null;
+  //       },
+  //       Component: EditEvent,
+  //     },
+  //     {
+  //       path: "/dashboard/tickets/verify",
+  //       Component: VerifyTicket,
+  //     },
+  //   ],
+  // },
 ]);
 
 function App() {

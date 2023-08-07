@@ -9,7 +9,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, { rawBody: true });
 
   app.use(cookieParser(process.env.COOKIE_SECRET));
-  app.enableCors({ credentials: true, origin: [process.env.CLIENT_URL] });
+  app.enableCors({ credentials: true, origin: [process.env.CLIENT_URL, 'http://localhost:3714'] });
   // app.useGlobalFilters(new LogExceptionFilter(httpAdapter));
   app.useGlobalPipes(new ValidationPipe({ transform: true, forbidNonWhitelisted: true, whitelist: true }));
 

@@ -47,8 +47,8 @@ export class TicketController {
   @ApiBearerAuth()
   @ApiOperation({ description: 'Get Ticket information' })
   @Get(':id')
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.Organizer)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   async getTicket(@Param('id') ticketId: string, @ReqUser() user: RequestUser) {
     const ticket = await this.ticketService.getTicket(ticketId, user);
 
