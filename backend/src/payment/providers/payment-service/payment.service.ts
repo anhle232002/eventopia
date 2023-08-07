@@ -6,11 +6,11 @@ import { BadRequestException, HttpException, Injectable, Logger, NotFoundExcepti
 import { PrismaService } from 'src/common/providers/prisma.service';
 import { StripeService } from 'src/common/providers/stripe.service';
 import { EventsService } from 'src/events/providers/event-service/events.service';
-import { CheckOutTicketDto, OrderArgs } from './payment.dto';
 import { TicketService } from 'src/ticket/ticket.service';
 import { PromoService } from 'src/promo/services/promo.service';
 import { Promo } from '@prisma/client';
 import { PROMOTION_TYPE } from 'src/common/constants';
+import { CheckOutTicketDto, TOrder } from 'src/payment/payment.dto';
 
 @Injectable()
 export class PaymentService {
@@ -151,7 +151,7 @@ export class PaymentService {
     try {
       const { metadata } = await this.stripeService.retrieveSessionWithItems((event.data.object as any).id);
 
-      const ticketOrder: OrderArgs = {
+      const ticketOrder: TOrder = {
         eventId: Number(metadata.eventId),
         price: Number(metadata.price),
         quantity: Number(metadata.quantity),
@@ -171,7 +171,7 @@ export class PaymentService {
     }
   }
 
-  async fulfillTicketOrder(order: OrderArgs) {
+  async fulfillTicketOrder(order: TOrder) {
     const ticketData = Array(order.quantity).fill({
       type: order.type,
       eventId: order.eventId,

@@ -1,11 +1,10 @@
 import { Logger } from '@nestjs/common';
-import { TicketGenerator } from './ticket.generator';
-import { readFile, mkdir } from 'fs/promises';
+import { mkdir } from 'fs/promises';
 import fs from 'fs';
 import puppeteer from 'puppeteer';
-import hbs from 'handlebars';
 import QRCode from 'qrcode';
 import path from 'path';
+import { PdfGenerator } from 'src/common/providers/pdf-generator/pdf.generator';
 
 export interface PDFTicketContent {
   eventName: string;
@@ -20,20 +19,7 @@ export interface PDFTicketContent {
   ticketVerifyUrl: string;
 }
 
-export class PDFTicketGenerator implements TicketGenerator {
-  private async compile(template: string, data: Record<string, any>) {
-    try {
-      const filePath = path.join(process.cwd(), 'src', 'templates', template);
-      const html = await readFile(filePath);
-
-      return hbs.compile(html.toString())(data);
-    } catch (error) {
-      Logger.error(error);
-
-      throw error;
-    }
-  }
-
+export class PDFTicketGenerator extends PdfGenerator {
   async generate(data: { template: string; content: PDFTicketContent }) {
     try {
       const browser = await puppeteer.launch({

@@ -38,7 +38,7 @@ export class BuyTicketDto {
   promoCode?: string;
 }
 
-export class OrderArgs {
+export interface TOrder {
   userId?: string;
   type: string;
   customerEmail: string;

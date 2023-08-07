@@ -1,94 +1,66 @@
+<!DOCTYPE html>
 <html>
   <head>
-    <title>E-Ticket Delivery</title>
+    <title>Event Ticket Invoice</title>
     <style>
       body {
         font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
+        padding: 20px; /* Add padding to the body */
+        display: flex;
+        justify-content: center; /* Center the content horizontally */
+        align-items: center; /* Center the content vertically */
+        min-height: 100vh; /* Ensure the content takes the full viewport height */
       }
-      .container {
-        max-width: 600px;
-        margin: 0 auto;
-        padding: 20px;
+      .invoice-container {
+        width: 80%; /* Adjust the width of the invoice table container */
       }
-      .header {
+      h1 {
         text-align: center;
         margin-bottom: 20px;
       }
-      .message {
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid #ccc;
         margin-bottom: 20px;
       }
-      .ticket-details {
-        background-color: #f5f5f5;
+      th,
+      td {
         padding: 10px;
-        border-radius: 5px;
+        text-align: left;
+        border-bottom: 1px solid #ccc;
       }
-      .qr-code-list {
-        list-style: none;
-        padding: 0;
-        margin: 20px 0;
-      }
-      .qr-code-list li {
-        margin: 10px;
-      }
-      .ticket {
-        margin-top: 2rem;
-      }
-      .ticket img {
-        width: 300px;
-        height: 300px;
-        margin: auto;
-        display: block;
-      }
-      .ticket h2 {
-        margin-top: 20px;
-        text-align: center;
+      th {
+        background-color: #f2f2f2;
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <div class="header">
-        <h1>E-Ticket Delivery</h1>
-      </div>
-      <div class="message">
-        <p>Dear {{customerName}},</p>
-        <p>Thank you for your purchase. We are pleased to provide you with the following e-tickets:</p>
-      </div>
-      <div class="ticket-details">
-        <h3>Event Details</h3>
-        <p><strong>Event:</strong> {{eventName}}</p>
-        <p><strong>Date:</strong> {{startDate}}</p>
-        <p><strong>Location:</strong> {{location}}</p>
-        <p><strong>Ticket Type:</strong> {{ticketType}}</p>
-        <p><strong>Quantity:</strong> {{quantity}}</p>
-        <p><strong>Total Amount:</strong> {{total}}</p>
-      </div>
-
-      <div>
-        <p>
-          Below are your unique QR codes. Please present these codes to our staff upon arrival at the event:
-        </p>
-
-        <ul class="qr-code-list">
-          {{#each qrCodes}}
-          <div class="ticket">
-            <h2>E-Ticket {{this.position}}</h2>
-            <img src="cid:{{this.cid}}" />
-          </div>
-          {{/each}}
-        </ul>
-      </div>
-
-      <div class="message">
-        <p>If you have any questions or need further assistance, please don't hesitate to contact us.</p>
-        <p>Thank you for choosing our services.</p>
-      </div>
-      <div class="footer">
-        <p>Best regards,</p>
-        <p>Eventopia</p>
-      </div>
+    <div class="invoice-container">
+      <!-- Add a container for the invoice table -->
+      <h1>Event Ticket Invoice</h1>
+      <table>
+        <tr>
+          <th>Event Name</th>
+          <td>{{eventName}}</td>
+        </tr>
+        <tr>
+          <th>Event Date</th>
+          <td>{{eventDate}}</td>
+        </tr>
+        <tr>
+          <th>Ticket Price</th>
+          <td>{{ticketPrice}}</td>
+        </tr>
+        <tr>
+          <th>Quantity</th>
+          <td>{{quantity}}</td>
+        </tr>
+        <tr>
+          <th>Total Amount</th>
+          <td>{{total}}</td>
+        </tr>
+      </table>
     </div>
   </body>
 </html>
