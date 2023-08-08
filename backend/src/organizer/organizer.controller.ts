@@ -25,6 +25,7 @@ import { GetFollowersDto } from './dto/get-followers.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { OptionalJWT } from 'src/common/guards/optional-jwt.guard';
 import { UsersService } from 'src/users/users.service';
+import { GetEventDto } from './dto/get-events.dto';
 
 @ApiTags('organizers')
 @Controller('/api/organizers')
@@ -60,10 +61,10 @@ export class OrganizerController {
   @Get('events')
   @Roles(Role.Organizer)
   @UseGuards(AuthGuard('jwt'), RolesGuard)
-  async getEvents(@Query('page', ParseIntPipe) page: number, @ReqUser() user: RequestUser) {
-    const { events, total } = await this.organizerService.getEvents(page, user);
+  async getEvents(@Query() getEventDto: GetEventDto, @ReqUser() user: RequestUser) {
+    const { events, total } = await this.organizerService.getEvents(getEventDto, user);
 
-    return { results: events, page: page, count: events.length, total: total };
+    return { results: events, page: getEventDto.page, count: events.length, total: total };
   }
 
   @ApiBearerAuth()

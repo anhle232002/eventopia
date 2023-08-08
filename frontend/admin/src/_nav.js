@@ -39,6 +39,18 @@ const _nav = [
   },
   {
     component: CNavItem,
+    name: 'Promotion codes',
+    to: '/organizer/promotions',
+    icon: <CIcon icon={cilPencil} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Create Promotion codes',
+    to: '/organizer/create-promotion',
+    icon: <CIcon icon={cilPencil} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
     name: 'Followers',
     to: '/theme/typography',
     icon: <CIcon icon={cilPencil} customClassName="nav-icon" />,
