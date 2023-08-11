@@ -11,6 +11,7 @@ import { CloudinaryService } from 'src/common/providers/cloudinary/cloudinary.se
 import { PrismaService } from 'src/common/providers/prisma.service';
 import { RequestUser } from 'src/users/users.dto';
 import { CreateOrganizerDto } from './dto/create-organizer.dto';
+import { GetEventDto } from './dto/get-events.dto';
 import { UpdateOrganizerDto } from './dto/update-organizer.dto';
 
 @Injectable()
@@ -172,10 +173,10 @@ export class OrganizerService {
     return organizer.followers;
   }
 
-  async getEvents(page: number, user: RequestUser) {
-    const query = {
+  async getEvents(getEventDto: GetEventDto, user: RequestUser) {
+    const query: Prisma.EventFindManyArgs = {
       take: this.EVENTS_PAGE_SIZE,
-      skip: this.EVENTS_PAGE_SIZE * (page - 1),
+      skip: this.EVENTS_PAGE_SIZE * (getEventDto.page - 1),
       where: {
         organizerId: user.organizer.id,
       },
@@ -187,6 +188,18 @@ export class OrganizerService {
         },
       },
     };
+
+    if (getEventDto.status) {
+      if (getEventDto.status === 'ended') {
+        query.where.startDate = {
+          lte: new Date(),
+        };
+      } else if (getEventDto.status === 'upcoming') {
+        query.where.startDate = {
+          gte: new Date(),
+        };
+      }
+    }
 
     const [events, total] = await Promise.all([
       this.prisma.event.findMany(query),

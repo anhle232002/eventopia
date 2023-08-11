@@ -5,6 +5,7 @@ export type BuyTicketDto = {
   customerName: string;
   customerCID: string;
   quantity: string;
+  promoCode?: string;
 };
 
 export const buyTicket = async (eventId: number, buyTicketDto: BuyTicketDto) => {

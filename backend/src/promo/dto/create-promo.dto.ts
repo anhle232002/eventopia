@@ -37,6 +37,7 @@ export class CreatePromoDto {
   @ApiProperty()
   @IsNumber()
   @Min(0)
+  @Transform((p) => parseInt(p.value))
   discount: number;
 
   @ApiProperty()

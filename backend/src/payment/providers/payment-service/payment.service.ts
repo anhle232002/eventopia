@@ -47,47 +47,51 @@ export class PaymentService {
       let promoCode: Promo | null = null;
 
       if (checkOutTicketDto.promoCode) {
-        const updatedPromo = await tx.promo.update({
-          where: {
-            code: checkOutTicketDto.promoCode,
-          },
-          data: {
-            used: { increment: 1 },
-          },
-          include: {
-            promoOnEvent: {
-              select: { eventId: true },
+        try {
+          const updatedPromo = await tx.promo.update({
+            where: {
+              code: checkOutTicketDto.promoCode,
             },
-            promoOnOrganizer: {
-              select: { organizerId: true },
+            data: {
+              used: { increment: 1 },
             },
-          },
-        });
+            include: {
+              promoOnEvent: {
+                select: { eventId: true },
+              },
+              promoOnOrganizer: {
+                select: { organizerId: true },
+              },
+            },
+          });
+          if (!updatedPromo) {
+            throw new NotFoundException('Promotion Code does not exist');
+          }
 
-        if (!updatedPromo) {
-          throw new NotFoundException('Promotion Code does not exist');
+          if (!this.promotionService.isValidPromoCode(updatedPromo)) {
+            throw new BadRequestException('The promotion code is invalid');
+          }
+
+          if (updatedPromo.used > updatedPromo.total) {
+            throw new BadRequestException('The promotion code has reached its maximum usage limit.');
+          }
+
+          if (
+            !this.promotionService.isApplicableEvent(updatedPromo, event.id) &&
+            !this.promotionService.isApplicableOrganizer(updatedPromo, event.organizerId)
+          ) {
+            throw new BadRequestException('Cannot apply this promotion code on this event');
+          }
+
+          if (!this.promotionService.isActivePromoCode(updatedPromo)) {
+            throw new BadRequestException('The promotion code is currently not active');
+          }
+          promoCode = updatedPromo;
+        } catch (error) {
+          if (error.code === 'P2025') throw new BadRequestException('Promotion does not exist');
+
+          throw error;
         }
-
-        if (!this.promotionService.isValidPromoCode(updatedPromo)) {
-          throw new BadRequestException('The promotion code is invalid');
-        }
-
-        if (updatedPromo.used > updatedPromo.total) {
-          throw new BadRequestException('The promotion code has reached its maximum usage limit.');
-        }
-
-        if (
-          !this.promotionService.isApplicableEvent(updatedPromo, event.id) &&
-          !this.promotionService.isApplicableOrganizer(updatedPromo, event.organizerId)
-        ) {
-          throw new BadRequestException('Cannot apply this promotion code on this event');
-        }
-
-        if (!this.promotionService.isActivePromoCode(updatedPromo)) {
-          throw new BadRequestException('The promotion code is currently not active');
-        }
-
-        promoCode = updatedPromo;
       }
 
       return { event, promoCode };

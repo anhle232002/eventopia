@@ -315,17 +315,23 @@ export default EventDetail;
 export const PaymentForm = ({ eventId }: { eventId: number }) => {
   const { register, handleSubmit } = useForm();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const onSubmit = async (data: Record<string, any>) => {
-    setIsLoading(true);
+    try {
+      setIsLoading(true);
 
-    const responseData = await buyTicket(eventId, data as BuyTicketDto);
+      const responseData = await buyTicket(eventId, data as BuyTicketDto);
 
-    setIsLoading(false);
+      setIsLoading(false);
 
-    window.open(responseData.url);
+      window.open(responseData.url);
 
-    (window as any).payment_modal.close();
+      (window as any).payment_modal.close();
+    } catch (error: any) {
+      setIsLoading(false);
+      setError(error.response.data.message);
+    }
   };
 
   return (
@@ -384,6 +390,24 @@ export const PaymentForm = ({ eventId }: { eventId: number }) => {
             className="input input-bordered input-sm w-full"
           />
         </div>
+
+        <div className="form-control w-full">
+          <label className="label">
+            <span className="label-text">Promotion</span>
+          </label>
+          <input
+            type="text"
+            {...register("promoCode")}
+            name="promoCode"
+            className="input input-bordered input-sm w-full"
+          />
+        </div>
+
+        {error && (
+          <div>
+            <p className="text-center text-error mt-2">{error}</p>
+          </div>
+        )}
 
         <div className="text-end space-x-4">
           <button

@@ -44,7 +44,6 @@ const CreateEvent = () => {
   }, [event, reset])
 
   const handleImageChange = (e) => {
-    console.log('hello')
     const file = e.target.files[0]
     const reader = new FileReader()
 
