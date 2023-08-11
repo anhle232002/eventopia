@@ -124,7 +124,7 @@ export class PaymentService {
         customerCID: checkOutTicketDto.customerCID,
         userId: checkOutTicketDto.userId,
         price: event.ticketPrice,
-        promoId: promoCode.id || null,
+        promoId: promoCode?.id || null,
         type: 'standard',
       },
       currency: 'usd',
